@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('firstAndLastName');
+            $table->string('fatherName');
+            $table->string('password');
+            $table->string('birthDate');
+            $table->string('address');
+            $table->string('study');
+            $table->string('career');
+            $table->boolean('magazeh')->default(false);
+            $table->string('PreviousCoursesInOtherPlace');
+            $table->boolean('isPreviousStudent')->default(false);
+            $table->string('previousCourses')->nullable();
             $table->timestamps();
         });
     }
