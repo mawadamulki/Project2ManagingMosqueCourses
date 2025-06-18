@@ -39,9 +39,28 @@ class User extends Authenticatable
 
     public function admin()
     {
-        return $this->hasOne(Admin::class);
+        return $this->hasOne(related: Admin::class);
     }
 
+public function userProfile(){
+        return $this->hasOne(related: UserProfile::class);
+
+}
+public function courses()
+{
+    return $this->belongsToMany(Course::class);
+}
+
+public function marks()
+{
+    return $this->hasMany(Mark::class);
+}
+
+
+public function supervisedCourses()
+{
+    return $this->hasMany(Course::class, 'supervisor_id');
+}
 
     // Helper methods
     public function isAdmin()

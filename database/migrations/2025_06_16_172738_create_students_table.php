@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('firstAndLastName');
             $table->string('fatherName');
+            $table->string('phoneNumber');
             $table->string('password');
             $table->string('birthDate');
             $table->string('address');
-            $table->string('study');
-            $table->string('career');
+            $table->string('studyOrCareer');
             $table->boolean('magazeh')->default(false);
             $table->string('PreviousCoursesInOtherPlace');
             $table->boolean('isPreviousStudent')->default(false);
