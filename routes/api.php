@@ -18,27 +18,13 @@ use App\Http\Controllers\ProfileController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
-
-Route::middleware('auth:sanctum')->get('/admin/user/{id}', [ProfileController::class, 'showUserProfile']);
-
-Route::get('/test', function() {
-    return response()->json(['message' => 'Test route works']);
-});
+Route::post('/login', [AuthController::class, 'login']);
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-// Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
-
-
-
-
-
-//     // Common authenticated routes
-//     Route::post('/logout', [AuthController::class, 'logout']);
-//     Route::get('/user', [AuthController::class, 'user']);
+    Route::delete('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
 
 //     // Admin-only routes
 //     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
@@ -63,4 +49,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //         Route::get('/reports', [AdminsterController::class, 'generateReports']);
 //         Route::post('/schedule', [AdminsterController::class, 'createSchedule']);
 //     });
-// });
+});

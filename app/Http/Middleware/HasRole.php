@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class role
+class HasRole
 {
     /**
      * Handle an incoming request.
@@ -15,6 +15,12 @@ class role
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!$request->user() || $request->user()->role !== $role) {
+            return response()->json([
+                'message' => 'Unauthorized - This action is restricted to '.$role.'s only'
+            ], 403);
+        }
+
         return $next($request);
     }
 }

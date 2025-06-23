@@ -31,6 +31,14 @@ return [
     |
     */
 
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['*'], // Change to your frontend URL in production
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => false,
+
     'stores' => [
 
         'array' => [

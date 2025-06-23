@@ -14,12 +14,6 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            // $table->string('firstAndLastName');
-            $table->string('fatherName');
-            $table->string('phoneNumber');
-            // $table->string('password');
-            $table->string('birthDate');
-            $table->string('address');
             $table->string('studyOrCareer');
             $table->boolean('magazeh')->default(false);
             $table->string('PreviousExperience');

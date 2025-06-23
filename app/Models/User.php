@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use App\Models\Admin;
 use App\Models\Teacher;
 use App\Models\Supervisor;
@@ -14,12 +15,18 @@ use App\Models\Student;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $fillable = [
+        'role',
         'name',
         'email',
         'password',
+        'firstAndLastName',
+        'fatherName',
+        'phoneNumber',
+        'address',
+        'birthDate',
     ];
 
     public function teacher()
