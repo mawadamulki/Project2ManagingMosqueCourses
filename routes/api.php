@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,15 +16,19 @@ use App\Http\Controllers\AuthController;
 |
 */
 
+
 Route::post('/register', [AuthController::class, 'register']);
 
+Route::middleware('auth:sanctum')->get('/admin/user/{id}', [ProfileController::class, 'showUserProfile']);
 
 Route::get('/test', function() {
     return response()->json(['message' => 'Test route works']);
 });
 
 
-
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 // Route::middleware(['auth:sanctum'])->group(function () {
 
 

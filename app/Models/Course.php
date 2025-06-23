@@ -16,14 +16,13 @@ public function users()
     return $this->belongsToMany(User::class);
 }
 
-public function subjects()
-{
-    return $this->hasMany(Subject::class);
-}
-public function supervisor()
-{
-    return $this->belongsTo(User::class, 'supervisor_id');
-}
+// public function subjects()
+// {
+//     return $this->hasMany(Subject::class);
+// }
 
+public function levels(){
+    return $this->hasMany(Level::class);
+}
 
 }
