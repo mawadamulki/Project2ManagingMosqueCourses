@@ -18,4 +18,8 @@ class Teacher extends Model
         'magazeh',
         'PreviousExperience',
     ];
+ public function subjects(){
+    return $this->hasMany(Subject::class);
+ }
+ 
 }

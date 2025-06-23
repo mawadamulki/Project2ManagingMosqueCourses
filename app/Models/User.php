@@ -57,10 +57,10 @@ public function marks()
 }
 
 
-public function supervisedCourses()
-{
-    return $this->hasMany(Course::class, 'supervisor_id');
-}
+// public function supervisedCourses()
+// {
+//     return $this->hasMany(Course::class, 'supervisor_id');
+// }
 
     // Helper methods
     public function isAdmin()
