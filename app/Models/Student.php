@@ -8,12 +8,6 @@ class Student extends Model
 {
     protected $fillable=[
         'user_id',
-        'firstAndLastName',
-        'fatherName',
-        'phoneNumber',
-        'password',
-        'birthDate',
-        'address',
         'studyOrCareer',
         'magazeh',
         'PreviousCoursesInOtherPlace',
