@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserProfile extends Model
 {
+
+protected $table = 'userProfiles';
     protected $fillable = [
         'user_id',
         'profile_image'
