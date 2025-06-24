@@ -55,7 +55,7 @@ public function userProfile(){
 }
 public function courses()
 {
-    return $this->belongsToMany(Course::class);
+    return $this->belongsToMany(Course::class,'courseStudentPivots');
 }
 
 public function marks()

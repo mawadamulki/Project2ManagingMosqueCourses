@@ -77,7 +77,7 @@ class AuthController extends Controller
                         'studyOrCareer' => $data['studyOrCareer'],
                         'magazeh' => filter_var($data['magazeh'], FILTER_VALIDATE_BOOLEAN),
                         'PreviousCoursesInOtherPlace' => $data['PreviousCoursesInOtherPlace'],
-                        'isPreviousStudent' => filter_var($data['isPreviousStudent'], FILTER_VALIDATE_BOOLEAN)
+                        'isPreviousStudent' => filter_var($data['isPreviousStudent'], FILTER_VALIDATE_BOOLEAN),
                     ];
 
                     // Only add previousCourses if it exists in the data
@@ -148,15 +148,16 @@ class AuthController extends Controller
     }
 
 
-    public function logout()
-    {
-        $user = Auth::user();
-        $user->currentAccessToken()->delete();
+    // public function logout()
+    // {
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
-    }
+    //     $user = Auth::user();
+    //     $user->currentAccessToken()->delete();
+
+    //     return response()->json([
+    //         'message' => 'Successfully logged out'
+    //     ]);
+    // }
 
 
 
