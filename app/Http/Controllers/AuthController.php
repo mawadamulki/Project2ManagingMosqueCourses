@@ -12,7 +12,7 @@ use App\Http\Models\Admin;
 use App\Http\Models\Student;
 use App\Http\Models\Teacher;
 use App\Http\Middleware\role;
-use App\Http\Models\Supervisor;
+use App\Http\Models\Subadmin;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
@@ -25,7 +25,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed|min:8',
-            'role' => 'required|in:admin,teacher,student,supervisor',
+            'role' => 'required|in:admin,teacher,student,subadmin',
             'firstAndLastName' => 'required|string',
             'fatherName' => 'required|string',
             'birthDate' => 'required|string',
@@ -43,10 +43,10 @@ class AuthController extends Controller
             'PreviousCoursesInOtherPlace' => 'required_if:role,student',
             'isPreviousStudent' => 'required_if:role,student|boolean',
 
-            // Supervisor-specific validation
-            'studyOrCareer' => 'required_if:role,supervisor',
-            'magazeh' => 'required_if:role,supervisor|boolean',
-            'PreviousExperience' => 'required_if:role,supervisor',
+            // Subadmin-specific validation
+            'studyOrCareer' => 'required_if:role,subadmin',
+            'magazeh' => 'required_if:role,subadmin|boolean',
+            'PreviousExperience' => 'required_if:role,subadmin',
         ]);
 
         // Create base user
@@ -89,8 +89,8 @@ class AuthController extends Controller
                     break;
 
 
-                case 'supervisor':
-                    $user->supervisor()->create([
+                case 'subadmin':
+                    $user->subadmin()->create([
                         'studyOrCareer' => $data['studyOrCareer'],
                         'magazeh' => filter_var($data['magazeh'], FILTER_VALIDATE_BOOLEAN),
                         'PreviousExperience' => $data['PreviousExperience']

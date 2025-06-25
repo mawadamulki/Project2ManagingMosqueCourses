@@ -129,12 +129,12 @@ class ProfileController extends Controller
     }
 
 
-    public function showDetailesForSupervisor()
+    public function showDetailesForSubadmin()
     {
 
         $user = Auth::user();
-        $user->load(['userProfile', 'supervisor']);
-        if ($user->role === 'supervisor') {
+        $user->load(['userProfile', 'subadmin']);
+        if ($user->role === 'subadmin') {
 
             $data = [
                 'id' => $user->id,
@@ -147,12 +147,12 @@ class ProfileController extends Controller
                 'birthDate' => $user->birthDate
             ];
 
-            $supervisorInfo = $user->supervisor;
+            $subadminInfo = $user->subadmin;
 
-            $data['supervisor_info'] = [
-                'studyOrCareer' => $supervisorInfo->studyOrCareer,
-                'magazeh' => $supervisorInfo->magazeh,
-                'PreviousExperience' => $supervisorInfo->PreviousExperience,
+            $data['subadmin_info'] = [
+                'studyOrCareer' => $subadminInfo->studyOrCareer,
+                'magazeh' => $subadminInfo->magazeh,
+                'PreviousExperience' => $subadminInfo->PreviousExperience,
             ];
 
             // $data['courses'] = $user->courses->map(function ($course) use ($user) {
@@ -206,7 +206,7 @@ class ProfileController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
-            $user = User::with(['student', 'teacher', 'supervisor', 'userProfile'])->findOrFail($id);
+            $user = User::with(['student', 'teacher', 'subadmin', 'userProfile'])->findOrFail($id);
 
             $response = [
                 'id' => $user->id,
@@ -233,9 +233,9 @@ class ProfileController extends Controller
                     }
                     break;
 
-                case 'supervisor':
-                    if ($user->supervisor) {
-                        $response['supervisorProfile'] = $user->supervisor;
+                case 'subadmin':
+                    if ($user->subadmin) {
+                        $response['subadminProfile'] = $user->subadmin;
                     }
                     break;
             }

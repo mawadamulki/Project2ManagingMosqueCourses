@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Admin;
 use App\Models\Teacher;
-use App\Models\Supervisor;
+use App\Models\Subadmin;
 use App\Models\Student;
 
 class User extends Authenticatable
@@ -39,9 +39,9 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
-    public function supervisor()
+    public function subadmin()
     {
-        return $this->hasOne(Supervisor::class);
+        return $this->hasOne(Subadmin::class);
     }
 
     public function admin()
@@ -66,7 +66,7 @@ public function marks()
 
 // public function supervisedCourses()
 // {
-//     return $this->hasMany(Course::class, 'supervisor_id');
+//     return $this->hasMany(Course::class, 'subadmin_id');
 // }
 
     // Helper methods
@@ -85,9 +85,9 @@ public function marks()
         return $this->role === 'student';
     }
 
-    public function isSupervisor()
+    public function isSubadmin()
     {
-        return $this->role === 'supervisor';
+        return $this->role === 'subadmin';
     }
 
 

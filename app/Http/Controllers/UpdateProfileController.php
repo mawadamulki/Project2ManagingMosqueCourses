@@ -34,7 +34,7 @@ class UpdateProfileController extends Controller
             $roleFolder = match ($user->role) {
                 'student' => 'students',
                 'teacher' => 'teachers',
-                'supervisor' => 'supervisors',
+                'subadmin' => 'subadmins',
                 'admin' => 'admins',
             };
 
@@ -135,12 +135,12 @@ class UpdateProfileController extends Controller
                 $user->teacher->save();
                 break;
 
-            case 'supervisor':
-                if (!$user->supervisor) {
-                    return response()->json(['message' => 'Supervisor info not found'], 404);
+            case 'subadmin':
+                if (!$user->subadmin) {
+                    return response()->json(['message' => 'Subadmin info not found'], 404);
                 }
-                $user->supervisor->studyOrCareer = $newValue;
-                $user->supervisor->save();
+                $user->subadmin->studyOrCareer = $newValue;
+                $user->subadmin->save();
                 break;
 
             case 'student':
@@ -186,12 +186,12 @@ class UpdateProfileController extends Controller
                 $user->teacher->save();
                 break;
 
-            case 'supervisor':
-                if (!$user->supervisor) {
-                    return response()->json(['message' => 'Supervisor info not found'], 404);
+            case 'subadmin':
+                if (!$user->subadmin) {
+                    return response()->json(['message' => 'Subadmin info not found'], 404);
                 }
-                $user->supervisor->magazeh = $newValue;
-                $user->supervisor->save();
+                $user->subadmin->magazeh = $newValue;
+                $user->subadmin->save();
                 break;
 
             case 'student':
@@ -235,12 +235,12 @@ class UpdateProfileController extends Controller
                 $user->teacher->save();
                 break;
 
-            case 'supervisor':
-                if (!$user->supervisor) {
-                    return response()->json(['message' => 'Supervisor info not found'], 404);
+            case 'subadmin':
+                if (!$user->subadmin) {
+                    return response()->json(['message' => 'Subadmin info not found'], 404);
                 }
-                $user->supervisor->PreviousExperience = $newValue;
-                $user->supervisor->save();
+                $user->subadmin->PreviousExperience = $newValue;
+                $user->subadmin->save();
                 break;
             default:
                 return response()->json(['message' => 'Role not supported'], 400);
