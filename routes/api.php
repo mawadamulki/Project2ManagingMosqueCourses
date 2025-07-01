@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UpdateProfileController;
+use App\Http\Controllers\JoiningRequestController;
+use App\Http\Middleware\HasRole;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+
     //_______________________ProfileController_________________________________________
     Route::get('/showDetailesForStudent', [ProfileController::class, 'showDetailesForStudent']);
     Route::get('/showUserProfileByAdmin/{id}', [ProfileController::class, 'showUserProfileByAdmin']);
@@ -45,30 +49,35 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
 
 
+    // Admin-only routes
+    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        Route::get('/getJoiningRequests/{course_id}', [JoiningRequestController::class, 'getJoiningRequests']);
+        Route::get('/getStudentInfo/{student_id}', [JoiningRequestController::class, 'getStudentInfo']);
+        Route::post('enrollStudentToLevel' , [JoiningRequestController::class, 'enrollStudentToLevel']);
+
+    });
 
 
 
-    //     // Admin-only routes
-    //     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-    //         Route::get('/dashboard', [AdminController::class, 'dashboard']);
-    //         Route::apiResource('/users', AdminController::class);
-    //     });
+    // Teacher-only routes
+    Route::middleware(['role:teacher'])->prefix('teacher')->group(function () {
 
-    //     // Teacher-only routes
-    //     Route::middleware(['role:teacher'])->prefix('teacher')->group(function () {
-    //         Route::get('/classes', [TeacherController::class, 'getClasses']);
-    //         Route::post('/assignments', [TeacherController::class, 'createAssignment']);
-    //     });
+    });
 
-    //     // Student-only routes
-    //     Route::middleware(['role:student'])->prefix('student')->group(function () {
-    //         Route::get('/grades', [StudentController::class, 'getGrades']);
-    //         Route::post('/assignments/submit', [StudentController::class, 'submitAssignment']);
-    //     });
 
-    //     // Adminster-only routes
-    //     Route::middleware(['role:adminster'])->prefix('adminster')->group(function () {
-    //         Route::get('/reports', [AdminsterController::class, 'generateReports']);
-    //         Route::post('/schedule', [AdminsterController::class, 'createSchedule']);
-    //     });
+
+    // Student-only routes
+    Route::middleware(['role:student'])->prefix('student')->group(function () {
+        Route::get('/createJoiningRequest/{course_id}', [JoiningRequestController::class, 'createJoiningRequest']);
+    });
+
+
+
+    // Adminster-only routes
+    Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {
+
+    });
+
+
+
 });

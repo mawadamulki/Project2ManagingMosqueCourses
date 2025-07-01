@@ -49,19 +49,19 @@ class User extends Authenticatable
         return $this->hasOne(related: Admin::class);
     }
 
-public function userProfile(){
-        return $this->hasOne(related: UserProfile::class);
+    public function userProfile(){
+            return $this->hasOne(related: UserProfile::class);
 
-}
-public function courses()
-{
-    return $this->belongsToMany(Course::class,'courseStudentPivots');
-}
+    }
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class,'courseStudentPivots');
+    }
 
-public function marks()
-{
-    return $this->hasMany(Mark::class);
-}
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
+    }
 
 
 // public function supervisedCourses()
