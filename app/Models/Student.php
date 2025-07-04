@@ -17,13 +17,25 @@ class Student extends Model
 
 
 
-     public function courses()
-{
-    return $this->belongsToMany(Course::class);
-}
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class);
+    }
 
-public function marks()
-{
-    return $this->hasMany(Mark::class);
-}
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
+    }
+
+    public function levels()
+    {
+        return $this->belongsToMany(Level::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
 }
