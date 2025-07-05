@@ -8,7 +8,8 @@ class Course extends Model
 {
 protected $fillable=[
     'courseName',
-    'description'
+    'courseImage',
+    'status'
 ];
 
 public function users()
