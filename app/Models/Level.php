@@ -26,5 +26,9 @@ class Level extends Model
         return $this->hasMany(Student::class);
     }
 
+public function curriculumPlans()
+{
+    return $this->hasMany(CurriculumPlan::class);
+}
 
 }

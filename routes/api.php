@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\UpdateProfileController;
+use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
 
 /*
@@ -24,7 +25,7 @@ use App\Http\Controllers\JoiningRequestController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
+Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -56,10 +57,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updateCourseByAdmin', [CourseController::class, 'updateCourseByAdmin']); //غير مكتمل بسبب نقص المعلومات
 
     //_______________________AnnouncementController___________________________________
+
     Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
     // Route::post('/createMultipleAnnouncements', [AnnouncementController::class, 'createMultipleAnnouncements']);
     Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
 
+    //_______________________CurriculumPlanController___________________________________
+
+    Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
+    Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
+    Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
