@@ -22,11 +22,11 @@ class JoiningRequestController extends Controller
 
 
     //Joining Request to Course From Student to Admin
-    public function createJoiningRequest($course_id){
+    public function createJoiningRequest($courseID){
         $user = Auth::user();
 
-        $existingRequest = JoiningRequest::where('student_id', $user->student->id)
-                                        ->where('course_id', $course_id)
+        $existingRequest = JoiningRequest::where('studentID', $user->student->id)
+                                        ->where('courseID', $courseID)
                                         ->first();
         if ($existingRequest) {
             return response()->json([
@@ -34,14 +34,14 @@ class JoiningRequestController extends Controller
             ], 409); // 409 Conflict
         }
 
-        $courseNotExit = Course::where('id', $course_id)->first();
+        $courseNotExit = Course::where('id', $courseID)->first();
         if(!$courseNotExit){
             return response()->json([
                 'message' => 'You Are Joining To Course Not Exiting.'
             ], 404); // 404 Not Found
         }
 
-        $courseIsPrevious = Course::findOrFail($course_id);
+        $courseIsPrevious = Course::findOrFail($courseID);
         if($courseIsPrevious->status === 'previous'){
             return response()->json([
                 'message' => 'Cannot join a course that has already ended.'
@@ -50,8 +50,8 @@ class JoiningRequestController extends Controller
 
         try {
         JoiningRequest::create([
-            'student_id' => $user->student->id,
-            'course_id' => $course_id
+            'studentID' => $user->student->id,
+            'courseID' => $courseID
         ]);
 
             return response()->json([
@@ -68,14 +68,14 @@ class JoiningRequestController extends Controller
 
 
 
-    public function getJoiningRequests($course_id){
+    public function getJoiningRequests($courseID){
 
-        $joiningRequests = JoiningRequest::where('course_id', $course_id)
+        $joiningRequests = JoiningRequest::where('courseID', $courseID)
             ->with(['student.user:id,firstAndLastName'])
             ->get([
                 'id',
-                'student_id',
-                'course_id',
+                'studentID',
+                'courseID',
                 'status'
             ]);
 
@@ -83,8 +83,8 @@ class JoiningRequestController extends Controller
         $formattedRequests = $joiningRequests->map(function ($request) {
             return [
                 'id' => $request->id,
-                'student_id' => $request->student_id,
-                'course_id' => $request->course_id,
+                'studentID' => $request->studentID,
+                'courseID' => $request->courseID,
                 'status' => $request->status,
                 'student_name' => $request->student->user->firstAndLastName ?? 'Unknown'
             ];
@@ -96,8 +96,8 @@ class JoiningRequestController extends Controller
         ]);
     }
 
-    public function getStudentInfo($student_id){
-        $student = Student::where('id',$student_id)->select(
+    public function getStudentInfo($studentID){
+        $student = Student::where('id',$studentID)->select(
             'studyOrCareer',
             'magazeh',
             'PreviousCoursesInOtherPlace',
@@ -109,8 +109,8 @@ class JoiningRequestController extends Controller
             return response()->json(['error' => 'Student not found'], 404);
         }
 
-        $user_id = Student::where('id',$student_id)->select('user_id')->first();
-        $user = User::where('id',$user_id->user_id)->select(
+        $userID = Student::where('id',$studentID)->select('userID')->first();
+        $user = User::where('id',$userID->userID)->select(
             'firstAndLastName',
             'fatherName',
             'phoneNumber',
@@ -135,36 +135,36 @@ class JoiningRequestController extends Controller
     public function enrollStudentToLevel(Request $request){
         // Validate the request data
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
+            'studentID' => 'required|exists:students,id',
+            'courseID' => 'required|exists:courses,id',
             'levelName' => 'required|in:introductory,level1,level2,level3,level4,level5,level6'
         ]);
 
         try {
-            $student = Student::findOrFail($validated['student_id']);
+            $student = Student::findOrFail($validated['studentID']);
 
-            $course = Course::findOrFail($validated['course_id']);
+            $course = Course::findOrFail($validated['courseID']);
 
             $requestedLevel = Level::firstOrCreate([
-                'course_id' => $course->id,
+                'courseID' => $course->id,
                 'levelName' => $validated['levelName']
             ]);
 
             // Check if student is already in any level of this course
             $currentEnrollment = DB::table('level_student_pivot')
-                ->join('levels', 'level_student_pivot.level_id', '=', 'levels.id')
-                ->where('level_student_pivot.student_id', $student->id)
-                ->where('levels.course_id', $course->id)
-                ->first(['levels.id as level_id', 'levels.levelName']);
+                ->join('levels', 'level_student_pivot.levelID', '=', 'levels.id')
+                ->where('level_student_pivot.studentID', $student->id)
+                ->where('levels.courseID', $course->id)
+                ->first(['levels.id as levelID', 'levels.levelName']);
             if ($currentEnrollment) {
                 return response()->json([
                     'message' => 'Student is already enrolled in a level of this course',
                     'current_level' => [
-                        'level_id' => $currentEnrollment->level_id,
+                        'levelID' => $currentEnrollment->levelID,
                         'levelName' => $currentEnrollment->levelName
                     ],
                     'requested_level' => [
-                        'level_id' => $requestedLevel->id,
+                        'levelID' => $requestedLevel->id,
                         'levelName' => $requestedLevel->levelName
                     ]
                 ], 409);
@@ -172,8 +172,8 @@ class JoiningRequestController extends Controller
 
             // If not enrolled, add them to the requested level
             DB::table('level_student_pivot')->insert([
-                'student_id' => $student->id,
-                'level_id' => $requestedLevel->id,
+                'studentID' => $student->id,
+                'levelID' => $requestedLevel->id,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
@@ -181,9 +181,9 @@ class JoiningRequestController extends Controller
             return response()->json([
                 'message' => 'Student successfully enrolled in level',
                 'data' => [
-                    'student_id' => $student->id,
-                    'course_id' => $course->id,
-                    'level_id' => $requestedLevel->id,
+                    'studentID' => $student->id,
+                    'courseID' => $course->id,
+                    'levelID' => $requestedLevel->id,
                     'levelName' => $requestedLevel->levelName
                 ]
             ], 201);

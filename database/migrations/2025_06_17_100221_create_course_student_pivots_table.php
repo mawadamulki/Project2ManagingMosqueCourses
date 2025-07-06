@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('courseStudentPivots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('userID')->constrained()->onDelete('cascade');
+            $table->foreignId('courseID')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

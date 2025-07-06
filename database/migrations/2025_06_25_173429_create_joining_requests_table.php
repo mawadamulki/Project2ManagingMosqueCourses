@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('joining_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('studentID')->constrained()->onDelete('cascade');
+            $table->foreignId('courseID')->constrained()->onDelete('cascade');
             $table->enum('status',['pending','approved','rejected'])->default('pending');
             $table->timestamps();
         });

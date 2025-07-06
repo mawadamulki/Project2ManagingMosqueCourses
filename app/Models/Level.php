@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Level extends Model
 {
     protected $fillable = [
-        'course_id',
+        'courseID',
         'levelName'
     ];
 
     public function course()
     {
-        return $this->belongsTo(Course::class,"course_id");
+        return $this->belongsTo(Course::class,"courseID");
     }
 
     public function subjects()

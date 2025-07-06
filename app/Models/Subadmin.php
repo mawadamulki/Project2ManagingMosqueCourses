@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Subadmin extends Model
 {
  protected $fillable = [
-        'user_id',
+        'userID',
         'studyOrCareer',
         'magazeh',
         'PreviousExperience',

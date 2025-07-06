@@ -8,7 +8,7 @@ class Subject extends Model
 {
     protected $fillable=[
         'subjectName',
-        'course_id'
+        'courseID'
     ];
 //     public function course()
 // {
@@ -20,10 +20,10 @@ public function marks()
     return $this->hasMany(Mark::class);
 }
 public function level(){
-    return $this->belongsTo(Level::class,"level_id");
+    return $this->belongsTo(Level::class,"levelID");
 }
 
 public function teacher(){
-    return $this->belongsTo(Teacher::class,"teacher_id");
+    return $this->belongsTo(Teacher::class,"teacherID");
 }
 }

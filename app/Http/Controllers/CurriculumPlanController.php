@@ -70,7 +70,7 @@ class CurriculumPlanController extends Controller
         });
 
         return response()->json([
-            'courseID' => $level->course_id,
+            'courseID' => $level->courseID,
             'levelName' => $level->levelName,
             'levelId' => $level->id,
             'curriculumPlan' => $curriculum

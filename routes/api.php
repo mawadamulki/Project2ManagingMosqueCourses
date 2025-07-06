@@ -70,8 +70,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/getJoiningRequests/{course_id}', [JoiningRequestController::class, 'getJoiningRequests']);
-        Route::get('/getStudentInfo/{student_id}', [JoiningRequestController::class, 'getStudentInfo']);
+        Route::get('/getJoiningRequests/{courseID}', [JoiningRequestController::class, 'getJoiningRequests']);
+        Route::get('/getStudentInfo/{studentID}', [JoiningRequestController::class, 'getStudentInfo']);
         Route::post('enrollStudentToLevel', [JoiningRequestController::class, 'enrollStudentToLevel']);
     });
 
@@ -84,7 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Student-only routes
     Route::middleware(['role:student'])->prefix('student')->group(function () {
-        Route::get('/createJoiningRequest/{course_id}', [JoiningRequestController::class, 'createJoiningRequest']);
+        Route::get('/createJoiningRequest/{courseID}', [JoiningRequestController::class, 'createJoiningRequest']);
     });
 
 
