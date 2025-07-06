@@ -20,7 +20,7 @@ class UpdateProfileController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $profile = UserProfile::where('user_id', $user->id)->first();
+        $profile = UserProfile::where('userID', $user->id)->first();
 
         if (!$profile) {
             $profile = $user->userProfile()->create();

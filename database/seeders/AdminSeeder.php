@@ -30,6 +30,6 @@ $user = User::create([
 
         // إنشاء سجل مرتبط في جدول admins
         Admin::create([
-            'user_id' => $user->id,
+            'userID' => $user->id,
         ]);    }
 }

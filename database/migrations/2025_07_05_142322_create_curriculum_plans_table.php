@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('curriculumPlans', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('level_id')->constrained()->onDelete('cascade');
+            $table->foreignId('levelID')->constrained()->onDelete('cascade');
             $table->string('sessionDate');
-             $table->string('sessionContent');
+            $table->string('sessionContent');
             $table->timestamps();
         });
     }

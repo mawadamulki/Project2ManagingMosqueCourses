@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class JoiningRequest extends Model
 {
      protected $fillable = [
-        'student_id',
-        'course_id',
+        'studentID',
+        'courseID',
         'status'
 
     ];

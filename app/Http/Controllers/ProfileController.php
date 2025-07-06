@@ -109,7 +109,7 @@ class ProfileController extends Controller
                             'id' => $level->id,
                             'levelName' => $level->name,
                             'subjects' => $level->subjects->filter(function ($subject) use ($user) {
-                                return $subject->teacher && $subject->teacher->user_id === $user->id;
+                                return $subject->teacher && $subject->teacher->userID === $user->id;
                             })->map(function ($subject) {
                                 return [
                                     'id' => $subject->id,
