@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('userProfiles', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('userID')->constrained()->onDelete('cascade');
-             $table->string('profile_image')->nullable();
+            $table->unsignedBigInteger('userID');
+            $table->foreign('userID')
+              ->references('id')
+              ->on('users')
+              ->onDelete('cascade');
+            $table->string('profile_image')->nullable();
             $table->timestamps();
         });
     }

@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('userID')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('userID');
+            $table->foreign('userID')
+              ->references('id')
+              ->on('users')
+              ->onDelete('cascade');
             $table->timestamps();
         });
     }

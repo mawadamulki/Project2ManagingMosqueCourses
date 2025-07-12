@@ -13,7 +13,7 @@ class Level extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class,"courseID");
+        return $this->belongsTo(Course::class, 'courseID');
     }
 
     public function subjects()
@@ -26,9 +26,9 @@ class Level extends Model
         return $this->hasMany(Student::class);
     }
 
-public function curriculumPlans()
-{
-    return $this->hasMany(CurriculumPlan::class);
-}
+    public function curriculumPlans()
+    {
+        return $this->hasMany(CurriculumPlan::class, 'levelID');
+    }
 
 }

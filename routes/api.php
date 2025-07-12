@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
 
     //_______________________CourseController___________________________________
-    Route::post('/createCourseByAdmin', [CourseController::class, 'createCourseByAdmin']);
+
     Route::post('/updateCourseByAdmin', [CourseController::class, 'updateCourseByAdmin']); //غير مكتمل بسبب نقص المعلومات
 
     //_______________________AnnouncementController___________________________________
@@ -73,6 +73,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getJoiningRequests/{courseID}', [JoiningRequestController::class, 'getJoiningRequests']);
         Route::get('/getStudentInfo/{studentID}', [JoiningRequestController::class, 'getStudentInfo']);
         Route::post('enrollStudentToLevel', [JoiningRequestController::class, 'enrollStudentToLevel']);
+        Route::post('/createCourse', [CourseController::class, 'createCourse']);
     });
 
 

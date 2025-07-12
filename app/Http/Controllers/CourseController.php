@@ -12,42 +12,37 @@ use Illuminate\Support\Facades\Storage;
 class CourseController extends Controller
 {
 
-    public function createCourseByAdmin(Request $request)
+    public function createCourse(Request $request)
     {
-        $user = Auth::user();
-
-        if ($user && $user->role === 'admin') {
-            $validated = $request->validate([
+        $validated = $request->validate([
                 'courseName' => ['required', 'string'],
                 'courseImage' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ]);
+
+        $imagePath = $request->file('courseImage')->store('courses', 'public');
+
+        $fullImageUrl = asset('storage/' . $imagePath);
+
+        $course = Course::create([
+            'courseName' => $validated['courseName'],
+            'status' => 'new',
+            'courseImage' => $fullImageUrl,
+        ]);
+        $levels = ['introductory', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6'];
+        foreach ($levels as $levelName) {
+            $course->levels()->create([
+                'levelName' => $levelName
             ]);
-
-            $imagePath = $request->file('courseImage')->store('courses', 'public');
-
-            $fullImageUrl = asset('storage/' . $imagePath);
-
-            $course = Course::create([
-                'courseName' => $validated['courseName'],
-                'status' => 'new',
-                'courseImage' => $fullImageUrl,
-            ]);
-            $levels = ['introductory', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6'];
-            foreach ($levels as $levelName) {
-                $course->levels()->create([
-                    'levelName' => $levelName
-                ]);
-            }
-            return response()->json([
-                'message' => 'Course created successfully with 7 levels.',
-                'course' => [
-                    'courseName' => $course->courseName,
-                    'status' => $course->status,
-                    'image_url' =>  $fullImageUrl,
-                ],
-            ], 201);
         }
+        return response()->json([
+            'message' => 'Course created successfully with 7 levels.',
+            'course' => [
+                'courseName' => $course->courseName,
+                'status' => $course->status,
+                'image_url' =>  $fullImageUrl,
+             ],
+            ], 201);
 
-        return response()->json(['message' => 'User not authorized'], 403);
     }
 
     public function updateCourseByAdmin(Request $request, $id)

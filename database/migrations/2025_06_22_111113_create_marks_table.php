@@ -13,8 +13,18 @@ return new class extends Migration
     {
         Schema::create('marks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('userID')->constrained()->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('userID');
+            $table->foreign('userID')
+              ->references('id')
+              ->on('users')
+              ->onDelete('cascade');
+
+            $table->unsignedBigInteger('subjectID');
+            $table->foreign('subjectID')
+              ->references('id')
+              ->on('subjects')
+              ->onDelete('cascade');
+
             $table->float('mark')->nullable();
             $table->timestamps();
         });

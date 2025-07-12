@@ -23,7 +23,7 @@ public function users()
 // }
 
 public function levels(){
-    return $this->hasMany(Level::class);
+    return $this->hasMany(Level::class, 'courseID');
 }
 
 }
