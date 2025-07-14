@@ -75,6 +75,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getStudentInfo/{studentID}', [JoiningRequestController::class, 'getStudentInfo']);
         Route::post('enrollStudentToLevel', [JoiningRequestController::class, 'enrollStudentToLevel']);
         Route::post('/createCourse', [CourseController::class, 'createCourse']);
+        Route::get('/startNewCourse/{courseID}', [CourseController::class, 'startNewCourse']);
+        Route::get('/endCurrentCourse/{couresID}', [CourseController::class, 'endCurrentCourse']);
+
     });
 
 

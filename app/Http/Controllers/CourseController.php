@@ -110,6 +110,54 @@ class CourseController extends Controller
 
     public function startNewCourse($courseId){
 
+        $course = Course::find($courseId);
+        if($course == null){
+            return response()->json([
+                'message' => 'course not found!'
+            ], 404);
+        }
+
+        if($course->status == 'new'){
+            $course->update([
+                'status' => 'current'
+            ]);
+
+            return response()->json([
+                'message' => 'course change its status successfully',
+                'course' => $course->fresh()
+            ], 200);
+        }else
+        return response()->json([
+                'message' => 'course is not new course',
+                'current_status' => $course->status
+        ], 422);   // 422 Unprocessable Entity
+
+    }
+
+    public function endCurrentCourse($courseId){
+
+        $course = Course::find($courseId);
+        if($course == null){
+            return response()->json([
+                'message' => 'course not found!'
+            ], 404);
+        }
+
+        if($course->status == 'current'){
+            $course->update([
+                'status' => 'previous'
+            ]);
+
+            return response()->json([
+                'message' => 'course change its status successfully',
+                'course' => $course->fresh()
+            ], 200);
+        }else
+        return response()->json([
+                'message' => 'course is not current course',
+                'current_status' => $course->status
+        ], 422);
+
     }
 
 
