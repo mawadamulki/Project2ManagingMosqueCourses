@@ -9,6 +9,6 @@ class Announcement extends Model
     protected $table="announcementsCourses";
      protected $fillable = [
         'description',
-        'announcementCourseImage'
+        'image'
     ];
 }

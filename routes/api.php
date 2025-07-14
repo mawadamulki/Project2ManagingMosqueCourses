@@ -25,7 +25,7 @@ use App\Http\Controllers\JoiningRequestController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
+
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -52,21 +52,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updatePreviousCoursesInOtherPlace', [UpdateProfileController::class, 'updatePreviousCoursesInOtherPlace']);
     Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
 
-    //_______________________CourseController___________________________________
 
-    Route::post('/updateCourseByAdmin', [CourseController::class, 'updateCourseByAdmin']); //غير مكتمل بسبب نقص المعلومات
 
-    //_______________________AnnouncementController___________________________________
 
-    Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
-    // Route::post('/createMultipleAnnouncements', [AnnouncementController::class, 'createMultipleAnnouncements']);
-    Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
+
 
     //_______________________CurriculumPlanController___________________________________
 
     Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
     Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
     Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
+
+    // All Actors Route
+    Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
+    Route::get('/getCurrentCourses', [CourseController::class, 'getCurrentCourses']);
+    Route::get('/getNewCourses', [CourseController::class, 'getNewCourses']);
+    Route::get('/getPreviousCourses', [CourseController::class, 'getPreviousCourses']);
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
@@ -91,5 +92,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // Adminster-only routes
-    Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {});
+    Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {
+        Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
+        Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
+
+    });
 });
