@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Announcement;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Validated;
@@ -84,27 +85,47 @@ class CourseController extends Controller
     //     return response()->json(['message' => 'User not authorized'], 403);
     // }
 
-    public function getNewCourses(){
-        $courses = Course::where('status','new')->get();
+    public function getAdminCourses(){
+        $courses = Course::get();
 
         return response()->json([
             'courses' =>$courses
         ]);
     }
 
-    public function getCurrentCourses(){
-        $courses = Course::where('status','current')->get();
+    public function getSubadminCourses(){
+        $courses = Course::whereIn('status', ['new', 'current'])->get();
 
         return response()->json([
-            'courses' =>$courses
+            'courses' => $courses
         ]);
     }
 
-    public function getPreviousCourses(){
-        $courses = Course::where('status','previous')->get();
+    public function getStudentCourses(){
+
+        $userID = Auth::user()->id;
+        $student = Student::where('userID', $userID)->first('id');
+
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        $courses1 = Course::select('courses.*')
+                    ->join('levels', 'levels.courseID', '=', 'courses.id')
+                    ->join('level_student_pivot', 'level_student_pivot.levelID', '=', 'levels.id')
+                    ->where('level_student_pivot.studentID', $student->id)
+                    ->distinct()
+                    ->get();
+
+        $courses2 = Course::where('status', 'new')->get();
+
+        $courses = array_merge(
+            $courses2->toArray(),
+            $courses1->toArray()
+        );
 
         return response()->json([
-            'courses' =>$courses
+            'courses' => $courses
         ]);
     }
 
