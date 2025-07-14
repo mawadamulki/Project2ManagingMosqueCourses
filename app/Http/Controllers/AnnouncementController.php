@@ -11,23 +11,18 @@ class AnnouncementController extends Controller
 {
     public function createAnnouncementCourse(Request $request)
     {
-        $user = Auth::user();
-
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
 
         $validated = $request->validate([
             'description'=>['required', 'string'],
-            'announcementCourseImage' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
-        $path = $request->file('announcementCourseImage')->store('announcementCourseImage', 'public');
+        $path = $request->file('image')->store('announcementCourseImage', 'public');
         $fullUrl = asset('storage/' . $path);
 
         $announcement = Announcement::create([
             'description'=>$validated['description'],
-            'announcementCourseImage' => $fullUrl,
+            'image' => $fullUrl,
         ]);
 
         return response()->json([
@@ -37,70 +32,68 @@ class AnnouncementController extends Controller
         ], 201);
     }
 
-//     public function createMultipleAnnouncements(Request $request)
-// {
-//     $user = Auth::user();
+    // public function createMultipleAnnouncements(Request $request){
 
-//     if (!$user || $user->role !== 'admin') {
-//         return response()->json(['message' => 'Unauthorized'], 403);
-//     }
+    //     $user = Auth::user();
 
-//     $validated = $request->validate([
-//         'announcementCourseImages.*' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-//     ]);
+    //     if (!$user || $user->role !== 'admin') {
+    //         return response()->json(['message' => 'Unauthorized'], 403);
+    //     }
 
-//        $files = $request->file('announcementCourseImages');
+    //     $validated = $request->validate([
+    //         'announcementCourseImages.*' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+    //     ]);
 
-//     if (!$files || !is_array($files)) {
-//         return response()->json(['message' => 'No images were uploaded.'], 400);
-//     }
-//     $imagePaths = [];
+    //     $files = $request->file('announcementCourseImages');
 
-//     foreach ($request->file('announcementCourseImages') as $image) {
-//         $path = $image->store('announcementCourseImage', 'public');
-//         $fullUrl = asset('storage/' . $path);
+    //     if (!$files || !is_array($files)) {
+    //         return response()->json(['message' => 'No images were uploaded.'], 400);
+    //     }
+    //     $imagePaths = [];
 
-//         $announcement = Announcement::create([
-//             'announcementCourseImage' => $fullUrl,
-//         ]);
+    //     foreach ($request->file('announcementCourseImages') as $image) {
+    //         $path = $image->store('announcementCourseImage', 'public');
+    //         $fullUrl = asset('storage/' . $path);
 
-//         $imagePaths[] = $fullUrl;
-//     }
+    //         $announcement = Announcement::create([
+    //             'announcementCourseImage' => $fullUrl,
+    //         ]);
 
-//     return response()->json([
-//         'message' => 'Announcements created successfully.',
-//         // 'images' => $imagePaths
-//     ],201);
-// }
-public function deleteAnnouncementCourse($id)
-{
-    $user = Auth::user();
+    //         $imagePaths[] = $fullUrl;
+    //     }
 
-    if (!$user || $user->role !== 'admin') {
-        return response()->json(['message' => 'Unauthorized'], 403);
+    //     return response()->json([
+    //         'message' => 'Announcements created successfully.',
+    //         // 'images' => $imagePaths
+    //     ],201);
+    // }
+
+    public function deleteAnnouncementCourse($id){
+
+        $announcement = Announcement::find($id);
+
+        if (!$announcement) {
+            return response()->json(['message' => 'Announcement not found'], 404);
+        }
+        $imagePath = str_replace(asset('storage') . '/', '', $announcement->announcementCourseImage);
+
+        Storage::disk('public')->delete($imagePath);
+
+        $announcement->delete();
+
+        return response()->json(['message' => 'Announcement deleted successfully.']);
     }
 
-    $announcement = Announcement::find($id);
 
-    if (!$announcement) {
-        return response()->json(['message' => 'Announcement not found'], 404);
+    public function getAllAnnouncements(){
+
+        $announcements = Announcement::select('id', 'description', 'image')->get();
+
+        return response()->json([
+            'announcements' =>$announcements
+        ]);
     }
-    $imagePath = str_replace(asset('storage') . '/', '', $announcement->announcementCourseImage);
-
-    Storage::disk('public')->delete($imagePath);
-
-    $announcement->delete();
-
-    return response()->json(['message' => 'Announcement deleted successfully.']);
-}
 
 
-public function getAllAnnouncements()
-{
-    $announcements = Announcement::select('id', 'description', 'announcementCourseImage')->get();
 
-    return response()->json([
-        'announcements' =>$announcements
-    ]);
-}
 }

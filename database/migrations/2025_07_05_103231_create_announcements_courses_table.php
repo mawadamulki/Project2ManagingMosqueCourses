@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('announcementsCourses', function (Blueprint $table) {
             $table->id();
             $table->string('description');
-            $table->string('announcementCourseImage');
+            $table->string('image');
             $table->timestamps();
         });
     }

@@ -14,8 +14,17 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->string('subjectName');
-            $table->foreignId('levelID')->constrained()->onDelete('cascade');
-            $table->foreignId('teacherID')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('levelID');
+            $table->foreign('levelID')
+              ->references('id')
+              ->on('levels')
+              ->onDelete('cascade');
+
+            $table->unsignedBigInteger('teacherID');
+            $table->foreign('teacherID')
+              ->references('id')
+              ->on('teachers')
+              ->onDelete('cascade');
             $table->timestamps();
         });
     }

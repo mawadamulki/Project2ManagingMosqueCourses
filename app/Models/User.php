@@ -31,22 +31,22 @@ class User extends Authenticatable
 
     public function teacher()
     {
-        return $this->hasOne(Teacher::class);
+        return $this->hasOne(Teacher::class, 'userID');
     }
 
     public function student()
     {
-        return $this->hasOne(Student::class);
+        return $this->hasOne(Student::class, 'userID');
     }
 
     public function subadmin()
     {
-        return $this->hasOne(Subadmin::class);
+        return $this->hasOne(Subadmin::class, 'userID');
     }
 
     public function admin()
     {
-        return $this->hasOne(related: Admin::class);
+        return $this->hasOne(Admin::class, 'userID');
     }
 
     public function userProfile(){
