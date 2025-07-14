@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use App\Models\JoiningRequest;
 use App\Models\Course;
 use App\Models\Student;
@@ -18,7 +19,7 @@ class JoiningRequestController extends Controller
     //تابع يعمل طلب اضافة من طالب                DONE
     //ادمن ينعرضلو طلبات الانضمام بس اسماء الطلاب   DONE
     //تابع يرجع معلومات الطالب مشان يحدد مستوى الطالب للادمن  DONE
-    //تابع يضيف طالب للفل معين من الدورة
+    //تابع يضيف طالب للفل معين من الدورة    DONE
 
 
     //Joining Request to Course From Student to Admin
@@ -132,30 +133,42 @@ class JoiningRequestController extends Controller
     }
 
 
-    public function enrollStudentToLevel(Request $request){
-        // Validate the request data
-        $validated = $request->validate([
+    public function enrollStudentToLevel($studentID, $courseID, $levelName){
+
+        // Manually validate the parameters
+        $validator = Validator::make([
+            'studentID' => $studentID,
+            'courseID' => $courseID,
+            'levelName' => $levelName
+        ], [
             'studentID' => 'required|exists:students,id',
             'courseID' => 'required|exists:courses,id',
             'levelName' => 'required|in:introductory,level1,level2,level3,level4,level5,level6'
         ]);
 
-        try {
-            $student = Student::findOrFail($validated['studentID']);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-            $course = Course::findOrFail($validated['courseID']);
+        try {
+            $student = Student::findOrFail($studentID);
+            $course = Course::findOrFail($courseID);
 
             $requestedLevel = Level::firstOrCreate([
                 'courseID' => $course->id,
-                'levelName' => $validated['levelName']
+                'levelName' => $levelName
             ]);
 
-            // Check if student is already in any level of this course
+            // Check existing enrollment
             $currentEnrollment = DB::table('level_student_pivot')
                 ->join('levels', 'level_student_pivot.levelID', '=', 'levels.id')
                 ->where('level_student_pivot.studentID', $student->id)
                 ->where('levels.courseID', $course->id)
                 ->first(['levels.id as levelID', 'levels.levelName']);
+
             if ($currentEnrollment) {
                 return response()->json([
                     'message' => 'Student is already enrolled in a level of this course',
@@ -170,7 +183,7 @@ class JoiningRequestController extends Controller
                 ], 409);
             }
 
-            // If not enrolled, add them to the requested level
+            // Enroll student
             DB::table('level_student_pivot')->insert([
                 'studentID' => $student->id,
                 'levelID' => $requestedLevel->id,
@@ -194,7 +207,6 @@ class JoiningRequestController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-
     }
 
 
