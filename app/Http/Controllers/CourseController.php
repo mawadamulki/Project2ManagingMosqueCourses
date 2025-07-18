@@ -93,15 +93,32 @@ class CourseController extends Controller
         ]);
     }
 
-    public function getSubadminCourses(){
-        $courses = Course::whereIn('status', ['new', 'current'])->get();
+    public function getSubadminNewCourses(){
+        $courses = Course::where('status', 'new')->get();
 
         return response()->json([
             'courses' => $courses
         ]);
     }
 
-    public function getStudentCourses(){
+    public function getSubadminCurrentCourses(){
+        //$courses = Course::whereIn('status', ['new', 'current'])->get();
+        $courses = Course::where('status', 'current')->get();
+
+        return response()->json([
+            'courses' => $courses
+        ]);
+    }
+
+    public function getStudentNewCourses(){
+        $courses = Course::where('status', 'new')->get();
+
+        return response()->json([
+            'courses' => $courses
+        ]);
+    }
+
+    public function getStudentEnrolledCourses(){
 
         $userID = Auth::user()->id;
         $student = Student::where('userID', $userID)->first('id');
@@ -110,19 +127,13 @@ class CourseController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $courses1 = Course::select('courses.*')
+        $courses = Course::select('courses.*')
                     ->join('levels', 'levels.courseID', '=', 'courses.id')
                     ->join('level_student_pivot', 'level_student_pivot.levelID', '=', 'levels.id')
                     ->where('level_student_pivot.studentID', $student->id)
                     ->distinct()
                     ->get();
 
-        $courses2 = Course::where('status', 'new')->get();
-
-        $courses = array_merge(
-            $courses2->toArray(),
-            $courses1->toArray()
-        );
 
         return response()->json([
             'courses' => $courses

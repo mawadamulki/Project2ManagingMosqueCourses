@@ -90,7 +90,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Student-only routes
     Route::middleware(['role:student'])->prefix('student')->group(function () {
         Route::get('/createJoiningRequest/{courseID}', [JoiningRequestController::class, 'createJoiningRequest']);
-        Route::get('/getStudentCourses', [CourseController::class, 'getStudentCourses']);
+        Route::get('/getStudentNewCourses', [CourseController::class, 'getStudentNewCourses']);
+        Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
 
     });
 
@@ -100,7 +101,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {
         Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
         Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
-        Route::get('/getSubadminCourses', [CourseController::class, 'getSubadminCourses']);
+        Route::get('/getSubadminNewCourses', [CourseController::class, 'getSubadminNewCourses']);
+        Route::get('/getSubadminCurrentCourses', [CourseController::class, 'getSubadminCurrentCourses']);
 
     });
 });
