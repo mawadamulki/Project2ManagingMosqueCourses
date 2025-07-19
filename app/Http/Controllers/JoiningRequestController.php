@@ -99,6 +99,7 @@ class JoiningRequestController extends Controller
 
     public function getStudentInfo($studentID){
         $student = Student::where('id',$studentID)->select(
+            'id',
             'studyOrCareer',
             'magazeh',
             'PreviousCoursesInOtherPlace',
