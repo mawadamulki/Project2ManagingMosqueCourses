@@ -10,6 +10,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\UpdateProfileController;
 use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
+use App\Http\Controllers\SubjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,10 +74,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getJoiningRequests/{courseID}', [JoiningRequestController::class, 'getJoiningRequests']);
         Route::get('/getStudentInfo/{studentID}', [JoiningRequestController::class, 'getStudentInfo']);
         Route::get('/enrollStudentToLevel/{studentID}/{courseID}/{levelName}', [JoiningRequestController::class, 'enrollStudentToLevel']);
+
         Route::post('/createCourse', [CourseController::class, 'createCourse']);
         Route::get('/startNewCourse/{courseID}', [CourseController::class, 'startNewCourse']);
         Route::get('/endCurrentCourse/{couresID}', [CourseController::class, 'endCurrentCourse']);
         Route::get('/getAdminCourses', [CourseController::class, 'getAdminCourses']);
+
+        Route::get('/getTeachers', [SubjectController::class, 'getTeachers']);
+        Route::post('addSubject', [SubjectController::class, 'addSubject']);
+        Route::get('/getSubjects/{courseID}/{levelName}', [SubjectController::class, 'getSubjects']);
+
 
     });
 

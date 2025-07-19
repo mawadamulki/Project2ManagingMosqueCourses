@@ -17,7 +17,7 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
                 'courseName' => ['required', 'string'],
-                'courseImage' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'courseImage' => ['required', 'image', 'mimes:jpeg,png,jpg,gif'],
         ]);
 
         $imagePath = $request->file('courseImage')->store('courses', 'public');
