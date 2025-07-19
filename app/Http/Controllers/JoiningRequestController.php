@@ -112,6 +112,7 @@ class JoiningRequestController extends Controller
 
         $userID = Student::where('id',$studentID)->select('userID')->first();
         $user = User::where('id',$userID->userID)->select(
+            'email',
             'firstAndLastName',
             'fatherName',
             'phoneNumber',
