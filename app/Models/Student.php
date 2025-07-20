@@ -37,5 +37,10 @@ class Student extends Model
         return $this->belongsTo(User::class, 'userID');
     }
 
+    public function bookRequest()
+    {
+        return $this->hasMany(BookRequest::class, 'studentID');
+    }
+
 
 }

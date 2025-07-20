@@ -29,4 +29,8 @@ class Subject extends Model
         return $this->hasOne(Curriculum::class, "subjectID");
     }
 
+    public function extension(){
+        return $this->hasMany(Extension::class, "subjectID");
+    }
+
 }

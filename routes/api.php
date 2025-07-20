@@ -26,13 +26,14 @@ use App\Http\Controllers\SubjectController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::get('/getAllAnnouncementsWithoutToken', [AnnouncementController::class, 'getAllAnnouncements']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
 
 
     //_______________________ProfileController_________________________________________
@@ -93,15 +94,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // Teacher-only routes
-    Route::middleware(['role:teacher'])->prefix('teacher')->group(function () {});
+    Route::middleware(['role:teacher'])->prefix('teacher')->group(function () {
+        Route::post('/addExtension', [SubjectController::class, 'addExtension']);
+        Route::delete('/deleteExtension/{extensionID}', [SubjectController::class, 'deleteExtension']);
+        Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
+
+    });
 
 
 
     // Student-only routes
     Route::middleware(['role:student'])->prefix('student')->group(function () {
         Route::get('/createJoiningRequest/{courseID}', [JoiningRequestController::class, 'createJoiningRequest']);
+
         Route::get('/getStudentNewCourses', [CourseController::class, 'getStudentNewCourses']);
         Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
+
+        Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
+        Route::get('/getSubjectDetailsStudent/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetailsStudent']);
 
     });
 
@@ -111,8 +121,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {
         Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
         Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
+
         Route::get('/getSubadminNewCourses', [CourseController::class, 'getSubadminNewCourses']);
         Route::get('/getSubadminCurrentCourses', [CourseController::class, 'getSubadminCurrentCourses']);
+
+        Route::get('/getBookRequestStudents/{curriculumID}', [SubjectController::class, 'getBookRequestStudents']);
 
     });
 });

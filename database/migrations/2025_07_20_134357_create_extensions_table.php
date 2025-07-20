@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('curricula', function (Blueprint $table) {
+        Schema::create('extensions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('subjectID');
             $table->foreign('subjectID')->references('id')->on('subjects')->onDelete('cascade');
-            $table->string('curriculumFile');
-            $table->string('curriculumName')->nullable();
+            $table->string('extensionFile');
+            $table->string('extensionName')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('curricula');
+        Schema::dropIfExists('extensions');
     }
 };
