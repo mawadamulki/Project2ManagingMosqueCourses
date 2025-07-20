@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Teacher;
 use App\Models\Level;
 use App\Models\Subject;
 use App\Models\Curriculum;
+use App\Models\Extension;
+use App\Models\Student;
+use App\Models\BookRequest;
 
 class SubjectController extends Controller
 {
@@ -22,18 +26,20 @@ class SubjectController extends Controller
     // 6) edit Curriculum                            DONE
 
     //  _______TEACHER________
-    // 1) show subject (with his)
-    // 2) show subject details (all)
-    // 3) add extention
-    // 4) detete extention
+    // 1) show subject (with his)             DONE (NOT IN NEED)
+    // 2) show subject details (all)          DONE (SAME ADMIN)
+    // 3) add extension                       DONE
+    // 4) detete extension                    DONE
 
     //  _______STUDENT________
-    // 1) show subject
-    // 2) show details
-    // 3) request book
+    // 1) show subject                      DONE (NOT IN NEED)
+    // 2) show details                      DONE
+    // 3) request book                      DONE
 
     //  _______SUBADMIN________
-    // 1) show book requests
+    // 1) show book requests                DONE
+
+
 
 
 
@@ -113,7 +119,7 @@ class SubjectController extends Controller
 
         $validated = $request->validate([
             'subjectID' => 'required|exists:subjects,id',
-            'curriculumFile' => 'required|file|mimes:pdf,doc,docx|max:51200' // 50MB max
+            'curriculumFile' => 'required|file|max:51200' // 50MB max
         ]);
 
         if(Curriculum::where('subjectID',$validated['subjectID'])->first())
@@ -125,10 +131,13 @@ class SubjectController extends Controller
 
         $fullPath = asset('storage/' . $path);
 
+        $curriculumName = $request->file('curriculumFile')->getClientOriginalName();
+
         // Create curriculum record
         $curriculum = Curriculum::create([
             'subjectID' => $validated['subjectID'],
-            'curriculumFile' => $fullPath
+            'curriculumFile' => $fullPath,
+            'curriculumName' => $curriculumName
         ]);
 
         return response()->json([
@@ -142,7 +151,7 @@ class SubjectController extends Controller
     public function updateCurriculum(Request $request){
         $validated = $request->validate([
             'subjectID' => 'required|exists:subjects,id',
-            'curriculumFile' => 'required|file|mimes:pdf,doc,docx|max:51200'
+            'curriculumFile' => 'required|file|max:51200'
         ]);
 
         $subject = Subject::findOrFail($validated['subjectID']);
@@ -163,8 +172,11 @@ class SubjectController extends Controller
 
         $fullPath = asset('storage/' . $path);
 
+        $curriculumName = $request->file('curriculumFile')->getClientOriginalName();
+
         $curriculum->update([
-            'curriculumFile' => $fullPath
+            'curriculumFile' => $fullPath,
+            'curriculumName' => $curriculumName
         ]);
 
         return response()->json([
@@ -184,14 +196,25 @@ class SubjectController extends Controller
             ->select([
                 'subjects.id',
                 'subjects.subjectName',
-                'teachers.id as teacher_id',
-                'users.firstAndLastName as teacher_name',
-                'curricula.id as curriculum_id',
-                'curricula.curriculumFile'
+                'teachers.id as teacherID',
+                'users.firstAndLastName as teacherName',
+                'curricula.id as curriculumID',
+                'curricula.curriculumFile',
+                'curricula.curriculumName'
             ])
             ->where('levels.courseID', $courseID)
             ->where('levels.levelName', $levelName)
             ->get();
+
+        $subjectIds = $subjects->pluck('id');
+        $extensions = DB::table('extensions')
+            ->whereIn('subjectID', $subjectIds)
+            ->get()
+            ->groupBy('subjectID');
+
+        $subjects->each(function ($subject) use ($extensions) {
+            $subject->extensions = $extensions->get($subject->id, []);
+        });
 
 
         return response()->json([
@@ -208,7 +231,167 @@ class SubjectController extends Controller
 
     }
 
+    public function addExtension(Request $request){
+        $validated = $request->validate([
+            'subjectID' => 'required|exists:subjects,id',
+            'extensionFile' => 'required|file|max:51200' // 50MB max
+        ]);
 
+        $path = $request->file('extensionFile')->store('extensions', 'public');
+
+        $fullPath = asset('storage/' . $path);
+
+        $extensionName = $request->file('extensionFile')->getClientOriginalName();
+
+
+        $extension = Extension::create([
+            'subjectID' => $validated['subjectID'],
+            'extensionFile' => $fullPath,
+            'extensionName' => $extensionName
+        ]);
+
+        return response()->json([
+            'message' => 'extension uploaded successfully',
+            'extension' => $extension
+        ], 201);
+    }
+
+    public function deleteExtension($extensionID){
+        $extension = Extension::find($extensionID);
+
+        if(!$extension){
+            return response()->json([
+                'message' => 'extension not found'
+            ], 404);
+        }
+
+        try {
+
+            $oldPath = str_replace(asset('storage/'), '', $extension->extensionFile);
+            Storage::disk('public')->delete($oldPath);
+
+            $extension->delete();
+
+            return response()->json([
+                'message' => 'Extension deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete extension',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+    }
+
+
+
+    //  __________ Student APIs ____________
+
+    public function requestBook($curriculumID){
+        $user = Auth::user();
+        $student = Student::where('userID', $user->id)->get()->first();
+
+        $curriculum = Curriculum::where('id',$curriculumID)->get()->first();
+
+        if($curriculum == null){
+            return response()->json([
+                'message' => 'Curriculum Not Found'
+            ], 404);
+        }
+
+        if(BookRequest::where('studentID',$student->id)
+                       ->where('curriculumID',$curriculum->id)->get()->first()){
+
+            return response()->json([
+                'message' => 'Book Request Already Added!'
+            ], 409);
+        }
+
+        $bookRequest = BookRequest::create([
+            'studentID' => $student->id,
+            'curriculumID' => $curriculum->id
+        ]);
+
+
+        return response()->json([
+            'message' => 'Book Request Added Successfully',
+            'bookRequest' => $bookRequest
+        ], 201);
+    }
+
+
+    public function getSubjectDetailsStudent($courseID, $levelName){
+
+        $student = Student::where('userID', Auth::id())->first();
+
+        $subjects = DB::table('subjects')
+            ->join('levels', 'subjects.levelID', '=', 'levels.id')
+            ->join('teachers', 'subjects.teacherID', '=', 'teachers.id')
+            ->join('users', 'teachers.userID', '=', 'users.id')
+            ->leftJoin('curricula', 'subjects.id', '=', 'curricula.subjectID')
+            ->select([
+                'subjects.id',
+                'subjects.subjectName',
+                'teachers.id as teacherID',
+                'users.firstAndLastName as teacherName',
+                'curricula.id as curriculumID',
+                'curricula.curriculumFile',
+                'curricula.curriculumName'
+            ])
+            ->where('levels.courseID', $courseID)
+            ->where('levels.levelName', $levelName)
+            ->get();
+
+        $subjectIds = $subjects->pluck('id');
+        $curriculumIds = $subjects->pluck('curriculumID')->filter()->unique();
+
+        $extensions = DB::table('extensions')
+            ->whereIn('subjectID', $subjectIds)
+            ->get()
+            ->groupBy('subjectID');
+
+        // Get requested books for this student
+        $requestedBooks = DB::table('book_requests')
+        ->join('curricula', 'book_requests.curriculumID', '=', 'curricula.id')
+        ->where('book_requests.studentID', $student->id)
+        ->whereIn('book_requests.curriculumID', $curriculumIds)
+        ->select('curricula.curriculumName')
+        ->pluck('curricula.curriculumName')
+        ->toArray();
+
+        // Add extensions to subjects
+        $subjects->each(function ($subject) use ($extensions, $requestedBooks) {
+            $subject->extensions = $extensions->get($subject->id, []);
+        });
+
+        return response()->json([
+            'subjects' => $subjects,
+            'requested_books' => $requestedBooks
+        ]);
+    }
+
+    // _________ Subadmin APIs ____________
+    public function getBookRequestStudents($curriculumID){
+
+        if (!$curriculum = Curriculum::find($curriculumID)) {
+            return response()->json(['message' => 'Curriculum not found'], 404);
+        }
+
+        $students = BookRequest::with('student.user')
+            ->where('curriculumID', $curriculumID)
+            ->get()
+            ->map(fn($r) => [
+                'studentID' => $r->student->id,
+                'studentName' => $r->student->user->firstAndLastName
+            ]);
+
+        return response()->json([
+            'total' => $students->count(),
+            'students' => $students
+        ]);
+    }
 
 
 
