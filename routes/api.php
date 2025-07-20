@@ -81,8 +81,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getAdminCourses', [CourseController::class, 'getAdminCourses']);
 
         Route::get('/getTeachers', [SubjectController::class, 'getTeachers']);
-        Route::post('addSubject', [SubjectController::class, 'addSubject']);
+        Route::post('/addSubject', [SubjectController::class, 'addSubject']);
         Route::get('/getSubjects/{courseID}/{levelName}', [SubjectController::class, 'getSubjects']);
+        Route::post('/addCurriculum', [SubjectController::class, 'addCurriculum']);
+        Route::post('/updateCurriculum', [SubjectController::class, 'updateCurriculum']);
+        Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
 
 
     });

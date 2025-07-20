@@ -3,35 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Teacher;
 use App\Models\Level;
 use App\Models\Subject;
-
+use App\Models\Curriculum;
 
 class SubjectController extends Controller
 {
-    //ADMIN
-    // 1) show subject names
+    //  ________ADMIN________
+    // 1) show subject names                         DONE
     // 2) add subject in level (teacher + name )     DONE
     // 3) show teacher to add subject                DONE
-    // 4) upload Curriculum
-    // 5) show subject detail
-    // 6) edit Curriculum
+    // 4) upload Curriculum                          DONE
+    // 5) show subject detail                        DONE
+    // 6) edit Curriculum                            DONE
 
-    // TEACHER
+    //  _______TEACHER________
     // 1) show subject (with his)
     // 2) show subject details (all)
     // 3) add extention
     // 4) detete extention
 
-    // STUDENT
+    //  _______STUDENT________
     // 1) show subject
     // 2) show details
     // 3) request book
 
-    // SUBADMIN
+    //  _______SUBADMIN________
     // 1) show book requests
+
+
 
 
     // __________ Admin api ___________
@@ -104,6 +108,107 @@ class SubjectController extends Controller
             'subjects' => $subjects
         ]);
     }
+
+    public function addCurriculum(Request $request){
+
+        $validated = $request->validate([
+            'subjectID' => 'required|exists:subjects,id',
+            'curriculumFile' => 'required|file|mimes:pdf,doc,docx|max:51200' // 50MB max
+        ]);
+
+        if(Curriculum::where('subjectID',$validated['subjectID'])->first())
+            return response()->json([
+                    'message' => 'the subject already have curriculum , please update it'
+            ]);
+
+        $path = $request->file('curriculumFile')->store('curricula', 'public');
+
+        $fullPath = asset('storage/' . $path);
+
+        // Create curriculum record
+        $curriculum = Curriculum::create([
+            'subjectID' => $validated['subjectID'],
+            'curriculumFile' => $fullPath
+        ]);
+
+        return response()->json([
+            'message' => 'Curriculum uploaded successfully',
+            'curriculum' => $curriculum
+        ], 201);
+
+    }
+
+
+    public function updateCurriculum(Request $request){
+        $validated = $request->validate([
+            'subjectID' => 'required|exists:subjects,id',
+            'curriculumFile' => 'required|file|mimes:pdf,doc,docx|max:51200'
+        ]);
+
+        $subject = Subject::findOrFail($validated['subjectID']);
+
+        $curriculum = $subject->curriculum;
+        if (!$subject->curriculum) {
+            return response()->json([
+                'message' => 'No curriculum found for this subject'
+            ], 404);
+        }
+
+        if ($subject->curriculum->curriculumFile) {
+            $oldPath = str_replace(asset('storage/'), '', $subject->curriculum->curriculumFile);
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $path = $request->file('curriculumFile')->store('curricula', 'public');
+
+        $fullPath = asset('storage/' . $path);
+
+        $curriculum->update([
+            'curriculumFile' => $fullPath
+        ]);
+
+        return response()->json([
+            'message' => 'Curriculum updated successfully',
+            'curriculum' => $curriculum,
+            'file_size' => Storage::disk('public')->size($path)
+        ]);
+
+    }
+
+    public function getSubjectDetails($courseID, $levelName){
+        $subjects = DB::table('subjects')
+            ->join('levels', 'subjects.levelID', '=', 'levels.id')
+            ->join('teachers', 'subjects.teacherID', '=', 'teachers.id')
+            ->join('users', 'teachers.userID', '=', 'users.id')
+            ->leftJoin('curricula', 'subjects.id', '=', 'curricula.subjectID')
+            ->select([
+                'subjects.id',
+                'subjects.subjectName',
+                'teachers.id as teacher_id',
+                'users.firstAndLastName as teacher_name',
+                'curricula.id as curriculum_id',
+                'curricula.curriculumFile'
+            ])
+            ->where('levels.courseID', $courseID)
+            ->where('levels.levelName', $levelName)
+            ->get();
+
+
+        return response()->json([
+            'subjects' => $subjects
+        ]);
+    }
+
+
+
+
+    // __________ Teacher api _____________
+
+    public function getSubject(){
+
+    }
+
+
 
 
 

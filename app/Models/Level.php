@@ -16,19 +16,20 @@ class Level extends Model
         return $this->belongsTo(Course::class, 'courseID');
     }
 
-    public function subjects()
+    public function subject()
     {
         return $this->hasMany(Subject::class);
     }
 
-    public function students()
+    public function student()
     {
         return $this->hasMany(Student::class);
     }
 
-    public function curriculumPlans()
+    public function curriculumPlan()
     {
         return $this->hasMany(CurriculumPlan::class, 'levelID');
     }
+
 
 }

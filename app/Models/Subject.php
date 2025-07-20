@@ -25,4 +25,8 @@ class Subject extends Model
         return $this->belongsTo(Teacher::class,"teacherID");
     }
 
+    public function curriculum(){
+        return $this->hasOne(Curriculum::class, "subjectID");
+    }
+
 }

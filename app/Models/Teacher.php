@@ -12,8 +12,15 @@ class Teacher extends Model
         'magazeh',
         'PreviousExperience',
     ];
- public function subjects(){
-    return $this->hasMany(Subject::class,'teacherID');
- }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userID');
+    }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class,'teacherID');
+    }
 
 }
