@@ -15,6 +15,7 @@ use App\Models\Extension;
 use App\Models\Student;
 use App\Models\BookRequest;
 
+
 class SubjectController extends Controller
 {
     //  ________ADMIN________
@@ -348,18 +349,18 @@ class SubjectController extends Controller
         $curriculumIds = $subjects->pluck('curriculumID')->filter()->unique();
 
         $extensions = DB::table('extensions')
-            ->whereIn('subjectID', $subjectIds)
-            ->get()
-            ->groupBy('subjectID');
+                ->whereIn('subjectID', $subjectIds)
+                ->get()
+                ->groupBy('subjectID');
 
         // Get requested books for this student
         $requestedBooks = DB::table('book_requests')
-        ->join('curricula', 'book_requests.curriculumID', '=', 'curricula.id')
-        ->where('book_requests.studentID', $student->id)
-        ->whereIn('book_requests.curriculumID', $curriculumIds)
-        ->select('curricula.curriculumName')
-        ->pluck('curricula.curriculumName')
-        ->toArray();
+                ->join('curricula', 'book_requests.curriculumID', '=', 'curricula.id')
+                ->where('book_requests.studentID', $student->id)
+                ->whereIn('book_requests.curriculumID', $curriculumIds)
+                ->select('curricula.curriculumName')
+                ->pluck('curricula.curriculumName')
+                ->toArray();
 
         // Add extensions to subjects
         $subjects->each(function ($subject) use ($extensions, $requestedBooks) {

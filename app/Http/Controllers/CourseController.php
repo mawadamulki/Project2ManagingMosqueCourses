@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Announcement;
 use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class CourseController extends Controller
 {
@@ -87,6 +90,31 @@ class CourseController extends Controller
 
     public function getAdminCourses(){
         $courses = Course::get();
+
+        return response()->json([
+            'courses' =>$courses
+        ]);
+    }
+
+    public function getTeacherCourses(){
+        $userID = Auth::user()->id;
+        $teacher = Teacher::where('userID', $userID)->get()->first();
+
+        $courses = DB::table('courses')
+                    ->join('levels', 'courses.id', '=', 'levels.CourseID')
+                    ->join('subjects', 'subjects.levelID', '=', 'levels.id')
+                    ->join('teachers', 'teachers.id', '=', 'subjects.teacherID')
+                    ->select([
+                        'courses.id',
+                        'courses.courseName',
+                        'courses.status',
+                        'courses.courseImage',
+                        'courses.created_at',
+                        'courses.updated_at'
+                    ])
+                    ->where('subjects.TeacherID', $teacher->id)
+                    ->distinct()
+                    ->get();
 
         return response()->json([
             'courses' =>$courses
