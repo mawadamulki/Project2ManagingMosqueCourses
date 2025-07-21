@@ -95,6 +95,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Teacher-only routes
     Route::middleware(['role:teacher'])->prefix('teacher')->group(function () {
+        Route::get('/getTeacherCourses', [CourseController::class, 'getTeacherCourses']);
+
         Route::post('/addExtension', [SubjectController::class, 'addExtension']);
         Route::delete('/deleteExtension/{extensionID}', [SubjectController::class, 'deleteExtension']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
