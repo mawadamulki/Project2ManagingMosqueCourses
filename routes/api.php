@@ -27,7 +27,7 @@ use App\Http\Controllers\JoiningRequestController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/getAllAnnouncementsWithoutToken', [AnnouncementController::class, 'getAllAnnouncements']);
+Route::get('/getAllAnnouncementsWithoutToken', action: [AnnouncementController::class, 'getAllAnnouncements']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -67,7 +67,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
 
     // All Actors Route
-    Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
     Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);
