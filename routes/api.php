@@ -6,11 +6,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\UpdateProfileController;
 use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
-use App\Http\Controllers\SubjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,8 +68,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // All Actors Route
     Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
-
-
+    Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
+    Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
+    Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);
+    Route::post('/replyToMessage/{messageId}', [MessagesController::class, 'replyToMessage']);
+    Route::delete('/deleteMessage/{id}', [MessagesController::class, 'deleteMessage']);
+    Route::get('/GetAllMessages', [MessagesController::class, 'GetAllMessages']);
+    Route::post('/updateMessage/{id}', [MessagesController::class, 'updateMessage']);
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
@@ -87,8 +93,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/addCurriculum', [SubjectController::class, 'addCurriculum']);
         Route::post('/updateCurriculum', [SubjectController::class, 'updateCurriculum']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
-
-
     });
 
 
@@ -111,8 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/getStudentNewCourses', [CourseController::class, 'getStudentNewCourses']);
         Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
-
-        Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
+  Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
         Route::get('/getSubjectDetailsStudent/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetailsStudent']);
 
     });
@@ -126,7 +129,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/getSubadminNewCourses', [CourseController::class, 'getSubadminNewCourses']);
         Route::get('/getSubadminCurrentCourses', [CourseController::class, 'getSubadminCurrentCourses']);
-
         Route::get('/getBookRequestStudents/{curriculumID}', [SubjectController::class, 'getBookRequestStudents']);
 
     });
