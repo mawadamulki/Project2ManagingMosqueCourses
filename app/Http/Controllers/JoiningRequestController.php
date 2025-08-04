@@ -193,6 +193,8 @@ class JoiningRequestController extends Controller
                 'updated_at' => now()
             ]);
 
+            DB::table('joining_requests')->where('studentID',$studentID)->delete();
+
             return response()->json([
                 'message' => 'Student successfully enrolled in level',
                 'data' => [

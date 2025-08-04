@@ -113,7 +113,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
 
         Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
-        Route::get('/getSubjectDetailsStudent/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetailsStudent']);
+        Route::get('/getSubjectDetailsStudent/{courseID}', [SubjectController::class, 'getSubjectDetailsStudent']);
 
     });
 

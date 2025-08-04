@@ -226,6 +226,7 @@ class SubjectController extends Controller
 
 
 
+
     // __________ Teacher api _____________
 
     public function getSubject(){
@@ -288,6 +289,8 @@ class SubjectController extends Controller
 
 
 
+
+
     //  __________ Student APIs ____________
 
     public function requestBook($curriculumID){
@@ -323,9 +326,25 @@ class SubjectController extends Controller
     }
 
 
-    public function getSubjectDetailsStudent($courseID, $levelName){
+    public function getSubjectDetailsStudent($courseID){
 
         $student = Student::where('userID', Auth::id())->first();
+
+        if (!$student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        // Get the student's level from the pivot table
+        $levelStudent = DB::table('level_student_pivot')
+            ->join('levels', 'level_student_pivot.levelID', '=', 'levels.id')
+            ->where('level_student_pivot.studentID', $student->id)
+            ->where('levels.courseID', $courseID)
+            ->select('levels.*')
+            ->first();
+
+        if (!$levelStudent) {
+            return response()->json(['error' => 'Student is not enrolled in any level for this course'], 404);
+        }
 
         $subjects = DB::table('subjects')
             ->join('levels', 'subjects.levelID', '=', 'levels.id')
@@ -342,7 +361,7 @@ class SubjectController extends Controller
                 'curricula.curriculumName'
             ])
             ->where('levels.courseID', $courseID)
-            ->where('levels.levelName', $levelName)
+            ->where('levels.id', $levelStudent->id)
             ->get();
 
         $subjectIds = $subjects->pluck('id');
@@ -368,10 +387,16 @@ class SubjectController extends Controller
         });
 
         return response()->json([
+            'levelName' => $levelStudent->levelName,
             'subjects' => $subjects,
             'requested_books' => $requestedBooks
         ]);
     }
+
+
+
+
+
 
     // _________ Subadmin APIs ____________
     public function getBookRequestStudents($curriculumID){
