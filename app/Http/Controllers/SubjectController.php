@@ -387,7 +387,6 @@ class SubjectController extends Controller
         });
 
         return response()->json([
-            'levelName' => $levelStudent->levelName,
             'subjects' => $subjects,
             'requested_books' => $requestedBooks
         ]);

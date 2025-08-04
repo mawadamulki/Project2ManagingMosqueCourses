@@ -155,7 +155,7 @@ class CourseController extends Controller
             return response()->json(['message' => 'Student not found'], 404);
         }
 
-        $courses = Course::select('courses.*')
+        $courses = Course::select('courses.*','levels.levelName')
                     ->join('levels', 'levels.courseID', '=', 'courses.id')
                     ->join('level_student_pivot', 'level_student_pivot.levelID', '=', 'levels.id')
                     ->where('level_student_pivot.studentID', $student->id)
