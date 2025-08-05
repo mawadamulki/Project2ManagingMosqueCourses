@@ -3,20 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Worksheet;
 use App\Models\QuestionOption;
 use App\Models\Question;
+use App\Models\Answer;
+use App\Models\Student;
+use App\Models\Teacher;
 
 class WorksheetController extends Controller
 {
     /*  ____ Teacher ____
 
     1) add worksheet      DONE
-    2) add question
-    3) edit question
+    2) add question       DONE
+    3) edit question      DONE
     4) delete question    DONE
     5) delete worksheet   DONE
+    6) add answers
 
         ____ Student ____
 
@@ -233,73 +238,163 @@ class WorksheetController extends Controller
     }
 
 
+    public function teacherSubmitAnswers(Request $request)
+    {
+        $request->validate([
+            'answers' => 'required|array',
+            'answers.*.questionID' => 'required|exists:questions,id',
+            'answers.*.answer' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $teacher = Teacher::where('userID', $user->id)->firstOrFail();
+
+        $answers = [];
+        $now = now();
+
+        foreach ($request->answers as $answerData) {
+            $answers[] = [
+                'teacherID' => $teacher->id,
+                'questionID' => $answerData['questionID'],
+                'answer' => $answerData['answer'],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        DB::transaction(function () use ($answers) {
+            Answer::insert($answers);
+        });
+
+
+        return response()->json([
+            'message' => 'answers submitted successfully'
+        ], 201);
+
+
+    }
+
+
+    public function teacherEditAnswer(Request $request) {
+
+        $request->validate([
+            'answerID' => 'required|exists:answers,id',
+            'answer' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $teacher = Teacher::where('userID', $user->id)->firstOrFail();
+
+        $answer = Answer::where('id', $request->answerID)
+                    ->where('teacherID', $teacher->id)
+                    ->firstOrFail();
+
+        $answer->update([
+            'answer' => $request->answer,
+        ]);
+
+        $an[] = [
+            'id' => $answer->id,
+            'teacherID' => $answer->teacherID,
+            'questionID' => $answer->questionID,
+            'answer' => $answer->answer,
+        ];
+
+        return response()->json([
+            'message' => 'Answer updated successfully',
+            'answer' => $an
+        ]);
+
+    }
+
+
 
     // ______________ Student ________________
 
 
-    public function submitAnswers(Request $request)
+    public function studentSubmitAnswers(Request $request)
     {
-        $validated = $request->validate([
-            'teacherID' => 'required|exists:teachers,id',
-            'worksheetID' => 'required|exists:worksheets,id',
+        $request->validate([
             'answers' => 'required|array',
-            'answers.*.questionID' => 'required|exists:questions,id,worksheetID,'.$request->worksheetID,
-            'answers.*.answer' => 'required|string'
+            'answers.*.questionID' => 'required|exists:questions,id',
+            'answers.*.answer' => 'required|string',
         ]);
 
-        DB::beginTransaction();
+        $user = Auth::user();
+        $student = Student::where('userID', $user->id)->firstOrFail();
 
-        try {
-            $teacherID = $validated['teacherID'];
-            $worksheet = Worksheet::with('questions')->find($validated['worksheetID']);
+        $answers = [];
+        $now = now();
 
-            // Delete existing teacher answers for these questions
-            Answer::whereIn('questionID', $worksheet->questions->pluck('id'))
-                ->whereNotNull('teacherID')
-                ->delete();
-
-            // Store new answers
-            $createdAnswers = [];
-            foreach ($validated['answers'] as $answerData) {
-                $question = Question::find($answerData['questionID']);
-
-                $answer = Answer::create([
-                    'teacherID' => $teacherID,
-                    'questionID' => $answerData['questionID'],
-                    'answer' => $answerData['answer'],
-                    'is_correct' => true
-                ]);
-
-                // Update correct_answer in questions table for automation questions
-                if ($question->type === 'automation') {
-                    $question->update(['correct_answer' => $answerData['answer']]);
-                }
-
-                $createdAnswers[] = [
-                    'question_id' => $answerData['questionID'],
-                    'answer_id' => $answer->id
-                ];
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'All answers submitted successfully',
-                'answers' => $createdAnswers,
-                'total_questions' => $worksheet->questions->count(),
-                'answers_submitted' => count($createdAnswers)
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to submit answers',
-                'error' => $e->getMessage()
-            ], 500);
+        foreach ($request->answers as $answerData) {
+            $answers[] = [
+                'studentID' => $student->id,
+                'questionID' => $answerData['questionID'],
+                'answer' => $answerData['answer'],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
+
+        DB::transaction(function () use ($answers) {
+            Answer::insert($answers);
+        });
+
+        return response()->json([
+            'message' => 'answers submitted successfully'
+        ], 201);
     }
+
+
+    public function studentEditAnswer(Request $request) {
+
+        $request->validate([
+            'answerID' => 'required|exists:answers,id',
+            'answer' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+        $student = Student::where('userID', $user->id)->firstOrFail();
+
+        $answer = Answer::where('id', $request->answerID)
+                    ->where('studentID', $student->id)
+                    ->firstOrFail();
+
+        $answer->update([
+            'answer' => $request->answer,
+        ]);
+
+        $an[] = [
+            'id' => $answer->id,
+            'studentID' => $answer->studentID,
+            'questionID' => $answer->questionID,
+            'answer' => $answer->answer,
+        ];
+
+        return response()->json([
+            'message' => 'Answer updated successfully',
+            'answer' => $an
+        ]);
+
+    }
+
+
+    public function getWorksheets($subjectID) {
+
+        $worksheets = Worksheet::where('subjectID', $subjectID)
+        ->with(['questions' => function($query) {
+            $query->select('id', 'worksheetID', 'type', 'question')
+                ->with(['options' => function($q) {
+                    $q->select('id', 'questionID', 'option');
+                }]);
+        }])->select('id', 'subjectID', 'worksheetName')->get();
+
+        return response()->json([
+            'worksheets' => $worksheets
+        ]);
+
+    }
+
 
 
 

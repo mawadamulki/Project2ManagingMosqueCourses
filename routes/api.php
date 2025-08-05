@@ -107,6 +107,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/deleteQuestion/{questionID}', [WorkSheetController::class, 'deleteQuestion']);
         Route::put('/editQuestion', [WorkSheetController::class, 'editQuestion']);
         Route::post('/addQuestionToWorksheet', [WorksheetController::class, 'addQuestionToWorksheet']);
+        Route::post('teacherSubmitAnswers', [WorksheetController::class, 'teacherSubmitAnswers']);
+        Route::put('teacherEditAnswer', [WorksheetController::class, 'teacherEditAnswer']);
+        Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
+
 
     });
 
@@ -121,6 +125,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
         Route::get('/getSubjectDetailsStudent/{courseID}', [SubjectController::class, 'getSubjectDetailsStudent']);
+
+        Route::post('studentSubmitAnswers', [WorksheetController::class, 'studentSubmitAnswers']);
+        Route::put('studentEditAnswer', [WorksheetController::class, 'studentEditAnswer']);
+        Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
 
     });
 
