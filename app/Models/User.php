@@ -62,12 +62,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(Mark::class);
     }
+public function sentMessages()
+{
+    return $this->hasMany(Message::class, 'senderID');
+}
+
+public function receivedMessages()
+{
+    return $this->hasMany(Message::class, 'receiverID');
+}
 
 
-// public function supervisedCourses()
-// {
-//     return $this->hasMany(Course::class, 'subadmin_id');
-// }
 
     // Helper methods
     public function isAdmin()
