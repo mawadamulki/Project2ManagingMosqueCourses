@@ -12,8 +12,12 @@ class Question extends Model
         'question'
     ];
 
-    public function worksheet(){
+    public function worksheets(){
         return $this->belongsTo(Worksheet::class ,'worksheetID');
+    }
+
+    public function questionOptions(){
+        return $this->hasMany(QuestionOption::class, 'questionID');
     }
 
 }

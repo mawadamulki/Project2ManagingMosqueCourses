@@ -82,7 +82,7 @@ class SubjectController extends Controller
             ], 404);
         }
 
-         if (Subject::where('subjectName', $validated['subjectName'])
+        if (Subject::where('subjectName', $validated['subjectName'])
                 ->where('teacherID', $validated['teacherID'])
                 ->exists()) {
             return response()->json([
