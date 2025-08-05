@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questoin_options', function (Blueprint $table) {
+        Schema::create('question_options', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('questionID');
             $table->foreign('questionID')->references('id')->on('questions')->onDelete('cascade');
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questoin_options');
+        Schema::dropIfExists('question_options');
     }
 };

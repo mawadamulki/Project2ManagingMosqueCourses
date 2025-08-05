@@ -9,6 +9,7 @@ class Answer extends Model
     protected $fillable = [
         'teacherID',
         'studentID',
+        'questionID',
         'answer'
     ];
 
@@ -18,6 +19,10 @@ class Answer extends Model
 
     public function teachers(){
         return $this->belongsTo(Teacher::class,'teacherID');
+    }
+
+    public function questions(){
+        return $this->belongsTo(Question::class, 'questionID');
     }
 
 

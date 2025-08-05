@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class QuestoinOption extends Model
+class QuestionOption extends Model
 {
     protected $fillable = [
         'questionID',

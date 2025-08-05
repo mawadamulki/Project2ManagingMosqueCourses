@@ -11,6 +11,7 @@ use App\Http\Controllers\UpdateProfileController;
 use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\WorksheetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/addExtension', [SubjectController::class, 'addExtension']);
         Route::delete('/deleteExtension/{extensionID}', [SubjectController::class, 'deleteExtension']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
+
+        Route::post('/addWorksheet', [WorkSheetController::class, 'addWorksheet']);
+        Route::delete('/deleteWorksheet/{worksheetID}', [WorkSheetController::class, 'deleteWorksheet']);
+        Route::delete('/deleteQuestion/{questionID}', [WorkSheetController::class, 'deleteQuestion']);
+        Route::put('/editQuestion', [WorkSheetController::class, 'editQuestion']);
+        Route::post('/addQuestionToWorksheet', [WorksheetController::class, 'addQuestionToWorksheet']);
 
     });
 
