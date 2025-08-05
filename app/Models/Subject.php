@@ -33,4 +33,8 @@ class Subject extends Model
         return $this->hasMany(Extension::class, "subjectID");
     }
 
+    public function worksheet(){
+        return $this->hasMany(Worksheet::class, 'subjectID');
+    }
+
 }

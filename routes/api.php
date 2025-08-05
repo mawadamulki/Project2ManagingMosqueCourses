@@ -12,7 +12,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\UpdateProfileController;
 use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
-
+use App\Http\Controllers\WorksheetController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -104,6 +104,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/deleteExtension/{extensionID}', [SubjectController::class, 'deleteExtension']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
 
+        Route::post('/addWorksheet', [WorkSheetController::class, 'addWorksheet']);
+        Route::delete('/deleteWorksheet/{worksheetID}', [WorkSheetController::class, 'deleteWorksheet']);
+        Route::delete('/deleteQuestion/{questionID}', [WorkSheetController::class, 'deleteQuestion']);
+        Route::put('/editQuestion', [WorkSheetController::class, 'editQuestion']);
+        Route::post('/addQuestionToWorksheet', [WorksheetController::class, 'addQuestionToWorksheet']);
+        Route::post('teacherSubmitAnswers', [WorksheetController::class, 'teacherSubmitAnswers']);
+        Route::put('teacherEditAnswer', [WorksheetController::class, 'teacherEditAnswer']);
+        Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
+
+
     });
 
 
@@ -115,7 +125,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getStudentNewCourses', [CourseController::class, 'getStudentNewCourses']);
         Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
   Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
-        Route::get('/getSubjectDetailsStudent/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetailsStudent']);
+        Route::get('/getSubjectDetailsStudent/{courseID}', [SubjectController::class, 'getSubjectDetailsStudent']);
+
+        Route::post('studentSubmitAnswers', [WorksheetController::class, 'studentSubmitAnswers']);
+        Route::put('studentEditAnswer', [WorksheetController::class, 'studentEditAnswer']);
+        Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
 
     });
 
