@@ -32,11 +32,6 @@ Route::get('/getAllAnnouncementsWithoutToken', action: [AnnouncementController::
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::delete('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
-
-
-
     //_______________________ProfileController_________________________________________
     Route::get('/showDetailesForStudent', [ProfileController::class, 'showDetailesForStudent']);
     Route::get('/showUserProfileByAdmin/{id}', [ProfileController::class, 'showUserProfileByAdmin']);
@@ -55,18 +50,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updatePreviousCoursesInOtherPlace', [UpdateProfileController::class, 'updatePreviousCoursesInOtherPlace']);
     Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
 
-
-
-
-
-
     //_______________________CurriculumPlanController___________________________________
 
     Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
     Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
     Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
 
+
+
     // All Actors Route
+
+    Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
+
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
     Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);
@@ -74,6 +69,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/deleteMessage/{id}', [MessagesController::class, 'deleteMessage']);
     Route::get('/GetAllMessages', [MessagesController::class, 'GetAllMessages']);
     Route::post('/updateMessage/{id}', [MessagesController::class, 'updateMessage']);
+
+
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
@@ -92,6 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/addCurriculum', [SubjectController::class, 'addCurriculum']);
         Route::post('/updateCurriculum', [SubjectController::class, 'updateCurriculum']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
+
     });
 
 
@@ -113,7 +111,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('teacherEditAnswer', [WorksheetController::class, 'teacherEditAnswer']);
         Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
 
-
     });
 
 
@@ -124,7 +121,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/getStudentNewCourses', [CourseController::class, 'getStudentNewCourses']);
         Route::get('/getStudentEnrolledCourses', [CourseController::class, 'getStudentEnrolledCourses']);
-  Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
+        Route::get('/requestBook/{curriculumID}', [SubjectController::class, 'requestBook']);
         Route::get('/getSubjectDetailsStudent/{courseID}', [SubjectController::class, 'getSubjectDetailsStudent']);
 
         Route::post('studentSubmitAnswers', [WorksheetController::class, 'studentSubmitAnswers']);
@@ -135,7 +132,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    // Adminster-only routes
+    // Subadmin-only routes
     Route::middleware(['role:subadmin'])->prefix('subadmin')->group(function () {
         Route::post('/createAnnouncementCourse', [AnnouncementController::class, 'createAnnouncementCourse']);
         Route::delete('/deleteAnnouncementCourse/{id}', [AnnouncementController::class, 'deleteAnnouncementCourse']);
