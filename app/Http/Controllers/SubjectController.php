@@ -326,8 +326,8 @@ class SubjectController extends Controller
     }
 
 
-    public function getSubjectDetailsStudent($courseID){
 
+    public function getSubjectDetailsStudent($courseID) {
         $student = Student::where('userID', Auth::id())->first();
 
         if (!$student) {
@@ -346,6 +346,7 @@ class SubjectController extends Controller
             return response()->json(['error' => 'Student is not enrolled in any level for this course'], 404);
         }
 
+        // First get all subjects with their curricula
         $subjects = DB::table('subjects')
             ->join('levels', 'subjects.levelID', '=', 'levels.id')
             ->join('teachers', 'subjects.teacherID', '=', 'teachers.id')
@@ -367,31 +368,30 @@ class SubjectController extends Controller
         $subjectIds = $subjects->pluck('id');
         $curriculumIds = $subjects->pluck('curriculumID')->filter()->unique();
 
+        // Get all requested books for this student
+        $requestedCurriculumIds = DB::table('book_requests')
+            ->where('studentID', $student->id)
+            ->whereIn('curriculumID', $curriculumIds)
+            ->pluck('curriculumID')
+            ->toArray();
+
+        // Get extensions
         $extensions = DB::table('extensions')
-                ->whereIn('subjectID', $subjectIds)
-                ->get()
-                ->groupBy('subjectID');
+            ->whereIn('subjectID', $subjectIds)
+            ->get()
+            ->groupBy('subjectID');
 
-        // Get requested books for this student
-        $requestedBooks = DB::table('book_requests')
-                ->join('curricula', 'book_requests.curriculumID', '=', 'curricula.id')
-                ->where('book_requests.studentID', $student->id)
-                ->whereIn('book_requests.curriculumID', $curriculumIds)
-                ->select('curricula.curriculumName')
-                ->pluck('curricula.curriculumName')
-                ->toArray();
-
-        // Add extensions to subjects
-        $subjects->each(function ($subject) use ($extensions, $requestedBooks) {
+        // Add is_requested flag and extensions to each subject
+        $subjects->transform(function ($subject) use ($requestedCurriculumIds, $extensions) {
+            $subject->is_requested = in_array($subject->curriculumID, $requestedCurriculumIds) ? true : false;
             $subject->extensions = $extensions->get($subject->id, []);
+            return $subject;
         });
 
         return response()->json([
-            'subjects' => $subjects,
-            'requested_books' => $requestedBooks
+            'subjects' => $subjects
         ]);
     }
-
 
 
 
