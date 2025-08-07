@@ -13,6 +13,8 @@ use App\Http\Controllers\UpdateProfileController;
 use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
 use App\Http\Controllers\WorksheetController;
+use App\Http\Controllers\PresenceController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -142,7 +144,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('/getSubadminNewCourses', [CourseController::class, 'getSubadminNewCourses']);
         Route::get('/getSubadminCurrentCourses', [CourseController::class, 'getSubadminCurrentCourses']);
-        Route::get('/getBookRequestStudents/{curriculumID}', [SubjectController::class, 'getBookRequestStudents']);
+        Route::get('/getBookRequestStudents/{courseID}/{levelName}', [SubjectController::class, 'getBookRequestStudents']);
+
+        Route::post('addPresence', [PresenceController::class, 'addPresence']);
+        Route::get('getStudentInLevel/{subjectID}', [PresenceController::class, 'getStudentInLevel']);
+        Route::get('getPresence/{subjectID}', [PresenceController::class, 'getPresence']);
 
     });
 });

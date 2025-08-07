@@ -334,7 +334,7 @@ class SubjectController extends Controller
             return response()->json(['error' => 'Student not found'], 404);
         }
 
-        // Get the student's level from the pivot table
+
         $levelStudent = DB::table('level_student_pivot')
             ->join('levels', 'level_student_pivot.levelID', '=', 'levels.id')
             ->where('level_student_pivot.studentID', $student->id)
@@ -372,7 +372,7 @@ class SubjectController extends Controller
                 ->get()
                 ->groupBy('subjectID');
 
-        // Get requested books for this student
+
         $requestedBooks = DB::table('book_requests')
                 ->join('curricula', 'book_requests.curriculumID', '=', 'curricula.id')
                 ->where('book_requests.studentID', $student->id)
@@ -381,7 +381,7 @@ class SubjectController extends Controller
                 ->pluck('curricula.curriculumName')
                 ->toArray();
 
-        // Add extensions to subjects
+
         $subjects->each(function ($subject) use ($extensions, $requestedBooks) {
             $subject->extensions = $extensions->get($subject->id, []);
         });
@@ -398,24 +398,57 @@ class SubjectController extends Controller
 
 
     // _________ Subadmin APIs ____________
-    public function getBookRequestStudents($curriculumID){
 
-        if (!$curriculum = Curriculum::find($curriculumID)) {
-            return response()->json(['message' => 'Curriculum not found'], 404);
+    public function getBookRequestStudents($courseID, $levelName) {
+
+        $level = Level::where('courseID',$courseID)
+                    ->where('levelName', $levelName)
+                    ->first();
+
+        if (!$level) {
+            return response()->json([
+                'message' => 'Level not found.'
+            ], 404);
         }
 
-        $students = BookRequest::with('student.user')
-            ->where('curriculumID', $curriculumID)
-            ->get()
-            ->map(fn($r) => [
-                'studentID' => $r->student->id,
-                'studentName' => $r->student->user->firstAndLastName
-            ]);
+        $levelID = $level->id;
 
-        return response()->json([
-            'total' => $students->count(),
-            'students' => $students
-        ]);
+        $curricula = Curriculum::with(['subject' => function($query) use ($levelID) {
+                $query->where('levelID', $levelID);
+            }])
+            ->whereHas('subject', function($query) use ($levelID) {
+                $query->where('levelID', $levelID);
+            })
+            ->get();
+
+
+        $bookRequests = BookRequest::with(['student.user', 'curriculum'])
+            ->whereIn('curriculumID', $curricula->pluck('id'))
+            ->get()
+            ->groupBy('curriculumID');
+
+
+        $response = [
+            'levelID' => $levelID,
+            'books' => $curricula->map(function($curriculum) use ($bookRequests) {
+                $requests = $bookRequests->get($curriculum->id, collect());
+
+                return [
+                    'bookID' => $curriculum->id,
+                    'bookName' => $curriculum->curriculumName,
+                    'total' => $requests->count(),
+                    'students' => $requests->map(function($request) {
+                        return [
+                            'studentID' => $request->student->id,
+                            'studentName' => $request->student->user->firstAndLastName
+                        ];
+                    })->values()
+
+                ];
+            })->filter(fn($book) => $book['total'] > 0) // Only include books with requests
+        ];
+
+        return response()->json($response);
     }
 
 
