@@ -42,5 +42,9 @@ class Student extends Model
         return $this->hasMany(BookRequest::class, 'studentID');
     }
 
+    public function presence()
+    {
+        return $this->hasMany(Presence::class, 'studentID');
+    }
 
 }
