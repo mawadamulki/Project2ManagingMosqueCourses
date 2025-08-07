@@ -110,6 +110,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('teacherSubmitAnswers', [WorksheetController::class, 'teacherSubmitAnswers']);
         Route::put('teacherEditAnswer', [WorksheetController::class, 'teacherEditAnswer']);
         Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
+        Route::get('getWorksheetWithAnswers/{worksheetID}', [WorksheetController::class, 'getWorksheetWithAnswers']);
 
     });
 
@@ -127,6 +128,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('studentSubmitAnswers', [WorksheetController::class, 'studentSubmitAnswers']);
         Route::put('studentEditAnswer', [WorksheetController::class, 'studentEditAnswer']);
         Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
+        Route::get('getWorksheetWithAnswers/{worksheetID}', [WorksheetController::class, 'getWorksheetWithAnswers']);
+        Route::get('getTeacherAnswers/{worksheetID}', [WorksheetController::class, 'getTeacherAnswers']);
 
     });
 

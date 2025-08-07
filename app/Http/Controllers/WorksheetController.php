@@ -73,20 +73,23 @@ class WorksheetController extends Controller
             DB::commit();
 
             return response()->json([
-                'worksheet' => [
-                    'id' => $worksheet->id,
-                    'name' => $worksheet->worksheetName,
-                    'subject_id' => $worksheet->subjectID,
-                    'questions' => $worksheet->questions->map(fn($q) => [
-                        'questionID' => $q->id,
-                        'type' => $q->type,
-                        'question' => $q->question,
-                        'options' => $q->type === 'automation'
-                            ? $q->options->pluck('option')->toArray()
-                            : null
-                    ])
-                ]
+                'message' => 'Worksheet Added Successfully.'
             ], 201);
+            // return response()->json([
+            //     'worksheet' => [
+            //         'id' => $worksheet->id,
+            //         'name' => $worksheet->worksheetName,
+            //         'subject_id' => $worksheet->subjectID,
+            //         'questions' => $worksheet->questions->map(fn($q) => [
+            //             'questionID' => $q->id,
+            //             'type' => $q->type,
+            //             'question' => $q->question,
+            //             'options' => $q->type === 'automation'
+            //                 ? $q->options->pluck('option')->toArray()
+            //                 : null
+            //         ])
+            //     ]
+            // ], 201);
 
         } catch (\Exception $e) {
 
@@ -105,13 +108,13 @@ class WorksheetController extends Controller
         try {
             $worksheet = Worksheet::with('questions.options')->findOrFail($worksheetID);
 
-            // Delete related records through Eloquent relationships
             $worksheet->questions->each(function($question) {
-                $question->options()->delete(); // Delete all options first
-                $question->delete(); // Then delete the question
+                $question->options()->delete();
+                $question->answers()->delete();
+                $question->delete();
             });
 
-            $worksheet->delete(); // Finally delete the worksheet
+            $worksheet->delete();
 
             return response()->json([
                 'message' => 'Worksheet and all related questions deleted successfully'
@@ -249,6 +252,29 @@ class WorksheetController extends Controller
         $user = Auth::user();
         $teacher = Teacher::where('userID', $user->id)->firstOrFail();
 
+        $questionIds = collect($request->answers)->pluck('questionID')->unique();
+
+        $existingAnswers = Answer::where('teacherID', $teacher->id)
+            ->whereIn('questionID', $questionIds)
+            ->get()
+            ->groupBy('questionID');
+
+        foreach ($request->answers as $answerData) {
+            if ($existingAnswers->has($answerData['questionID'])) {
+                return response()->json([
+                    'message' => 'You already submitted answers for same worksheet, please edit it instead.',
+                    'conflicts' => $existingAnswers->map(function($answers, $questionId) {
+                        return [
+                            'questionID' => $questionId,
+                            'existingAnswerID' => $answers->first()->id,
+                            'message' => 'Please edit your existing answer instead'
+                        ];
+                    })->values(),
+                    'error_code' => 'answers_exist'
+                ], 422);
+            }
+        }
+
         $answers = [];
         $now = now();
 
@@ -323,6 +349,29 @@ class WorksheetController extends Controller
         $user = Auth::user();
         $student = Student::where('userID', $user->id)->firstOrFail();
 
+        $questionIds = collect($request->answers)->pluck('questionID')->unique();
+
+        $existingAnswers = Answer::where('studentID', $student->id)
+            ->whereIn('questionID', $questionIds)
+            ->get()
+            ->groupBy('questionID');
+
+        foreach ($request->answers as $answerData) {
+            if ($existingAnswers->has($answerData['questionID'])) {
+                return response()->json([
+                    'message' => 'You already submitted answers for same worksheet, please edit it instead.',
+                    'conflicts' => $existingAnswers->map(function($answers, $questionId) {
+                        return [
+                            'questionID' => $questionId,
+                            'existingAnswerID' => $answers->first()->id,
+                            'message' => 'Please edit your existing answer instead'
+                        ];
+                    })->values(),
+                ], 422);
+            }
+        }
+
+
         $answers = [];
         $now = now();
 
@@ -382,12 +431,7 @@ class WorksheetController extends Controller
     public function getWorksheets($subjectID) {
 
         $worksheets = Worksheet::where('subjectID', $subjectID)
-        ->with(['questions' => function($query) {
-            $query->select('id', 'worksheetID', 'type', 'question')
-                ->with(['options' => function($q) {
-                    $q->select('id', 'questionID', 'option');
-                }]);
-        }])->select('id', 'subjectID', 'worksheetName')->get();
+        ->select('id', 'worksheetName')->get();
 
         return response()->json([
             'worksheets' => $worksheets
@@ -396,6 +440,97 @@ class WorksheetController extends Controller
     }
 
 
+
+    public function getWorksheetWithAnswers($worksheetId) {
+        $user = Auth::user();
+
+        $worksheet = Worksheet::with(['questions' => function($query) {
+            $query->with('options:id,questionID,option');
+        }])->findOrFail($worksheetId);
+
+        $answers = collect();
+
+        if ($user->teacher) {
+            $answers = Answer::where('teacherID', $user->teacher->id)
+                ->whereIn('questionID', $worksheet->questions->pluck('id'))
+                ->with(['student' => function($query) {
+                    $query->with('user:id,name');
+                }])
+                ->get()
+                ->groupBy('questionID');
+
+        } elseif ($user->student) {
+            $answers = Answer::where('studentID', $user->student->id)
+                ->whereIn('questionID', $worksheet->questions->pluck('id'))
+                ->with(['teacher' => function($query) {
+                    $query->with('user:id,name');
+                }])
+                ->get()
+                ->groupBy('questionID');
+        }
+
+        return response()->json([
+            'worksheet' => [
+                'id' => $worksheet->id,
+                'name' => $worksheet->worksheetName,
+                'subject_id' => $worksheet->subjectID,
+                'questions' => $worksheet->questions->map(function($question) use ($answers, $user) {
+                    $questionAnswers = $answers->get($question->id, collect());
+
+                    return [
+                        'id' => $question->id,
+                        'question' => $question->question,
+                        'type' => $question->type,
+                        'options' => $question->options->pluck('option')->toArray(),
+                        'answer' => $questionAnswers->map(function($answer) use ($user) {
+                            $response = [
+                                'id' => $answer->id,
+                                'answer' => $answer->answer
+                            ];
+
+                            return $response;
+                        })
+                    ];
+                })
+            ]
+        ]);
+    }
+
+
+    public function getTeacherAnswers($worksheetID) {
+
+        $user = Auth::user();
+        $student = $user->student()->firstOrFail();
+
+
+        $worksheet = Worksheet::with(['questions' => function($query) {
+            $query->with(['answers' => function($q) {
+                $q->whereNotNull('teacherID') // Only teacher-provided answers
+                ->with('teacher.user:id,firstAndLastName'); // Include teacher info
+            }]);
+        }])->findOrFail($worksheetID);
+
+
+        $formattedQuestions = $worksheet->questions->map(function($question) {
+            return [
+                'questionID' => $question->id,
+                'question' => $question->question,
+                'type' => $question->type,
+                'teacherAnswers' => $question->answers->map(function($answer) {
+                    return [
+                        'answerID' => $answer->id,
+                        'answer' => $answer->answer
+                    ];
+                })
+            ];
+        });
+
+        return response()->json([
+            'worksheet_id' => $worksheet->id,
+            'worksheet_name' => $worksheet->worksheetName,
+            'questions' => $formattedQuestions
+        ]);
+    }
 
 
 }

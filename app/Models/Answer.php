@@ -13,11 +13,11 @@ class Answer extends Model
         'answer'
     ];
 
-    public function students(){
+    public function student(){
         return $this->belongsTo(Student::class,'studentID');
     }
 
-    public function teachers(){
+    public function teacher(){
         return $this->belongsTo(Teacher::class,'teacherID');
     }
 
