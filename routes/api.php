@@ -64,6 +64,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
 
+    Route::get('getSubjects/{couresID}/{levelName}', [PresenceController::class, 'getSubjects']);
+
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
     Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);

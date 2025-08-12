@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Presence;
 use App\Models\Subject;
 use App\Models\Student;
+use App\Models\Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -119,6 +120,27 @@ class PresenceController extends Controller
             'subjectID' => $subjectID,
             'presence' => $result
         ]);
+    }
+
+
+    public function getSubjects($courseID, $levelName){
+        $level = Level::where('courseID',$courseID)
+                    ->where('levelName', $levelName)
+                    ->first();
+
+        if (!$level) {
+            return response()->json([
+                'message' => 'Level not found.'
+            ], 404);
+        }
+
+        $subjects = Subject::where('levelID', $level->id)
+        ->select('id','subjectName','levelID','teacherID')->get();
+
+        return response()->json([
+            'subjects' => $subjects
+        ]);
+
     }
 
 
