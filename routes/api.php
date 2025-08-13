@@ -14,6 +14,7 @@ use App\Http\Controllers\CurriculumPlanController;
 use App\Http\Controllers\JoiningRequestController;
 use App\Http\Controllers\WorksheetController;
 use App\Http\Controllers\PresenceController;
+use App\Http\Controllers\ResultController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +66,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
 
     Route::get('getSubjects/{couresID}/{levelName}', [PresenceController::class, 'getSubjects']);
+    Route::get('getStudentInLevel/{subjectID}', [PresenceController::class, 'getStudentInLevel']);
+
 
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
@@ -94,6 +97,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/updateCurriculum', [SubjectController::class, 'updateCurriculum']);
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
 
+        Route::get('getMarksAdmin/{subjectID}', [ResultController::class, 'getMarks']);
+
     });
 
 
@@ -116,6 +121,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getWorksheets/{subjectID}', [WorksheetController::class, 'getWorksheets']);
         Route::get('getWorksheetWithAnswers/{worksheetID}', [WorksheetController::class, 'getWorksheetWithAnswers']);
 
+        Route::get('getTeacherSubjects/{courseID}/{levelName}', [ResultController::class, 'getTeacherSubjects']);
+        Route::get('getMarksTeacher/{subjectID}', [ResultController::class, 'getMarks']);
+
     });
 
 
@@ -135,6 +143,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getWorksheetWithAnswers/{worksheetID}', [WorksheetController::class, 'getWorksheetWithAnswers']);
         Route::get('getTeacherAnswers/{worksheetID}', [WorksheetController::class, 'getTeacherAnswers']);
 
+        Route::get('getMarksStudent/{subjectID}', [ResultController::class, 'getMarksStudent']);
+
     });
 
 
@@ -151,6 +161,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('addPresence', [PresenceController::class, 'addPresence']);
         Route::get('getStudentInLevel/{subjectID}', [PresenceController::class, 'getStudentInLevel']);
         Route::get('getPresence/{subjectID}', [PresenceController::class, 'getPresence']);
+
+        Route::post('addEmptyMarks/{subjectID}', [ResultController::class, 'addEmptyMarks']);
+        Route::post('addTestMarks/{subjectID}', [ResultController::class, 'addTestMarks']);
+        Route::post('addExamMarks/{subjectID}', [ResultController::class, 'addExamMarks']);
+        Route::get('getMarksSubadmin/{subjectID}', [ResultController::class, 'getMarks']);
 
     });
 });

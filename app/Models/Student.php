@@ -29,7 +29,7 @@ class Student extends Model
 
     public function levels()
     {
-        return $this->belongsToMany(Level::class);
+        return $this->belongsToMany(Level::class, 'level_student_pivot', 'studentID', 'levelID');
     }
 
     public function user()
