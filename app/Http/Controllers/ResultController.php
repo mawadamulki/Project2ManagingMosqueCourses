@@ -218,24 +218,21 @@ class ResultController extends Controller
                 ->get();
 
             $formattedData = [
-                'subjectId' => $subjectID,
-                'savedMarks' => [
                     'study' => [],
                     'exam' => [],
                     'attendance' => [],
                     'total' => [],
                     'status' => []
-                ]
             ];
 
             foreach ($results as $result) {
                 $studentID = $result->studentID;
 
-                $formattedData['savedMarks']['study'][$studentID] = $result->test ?? 0;
-                $formattedData['savedMarks']['exam'][$studentID] = $result->exam ?? 0;
-                $formattedData['savedMarks']['attendance'][$studentID] = $result->presenceMark ?? 0;
-                $formattedData['savedMarks']['total'][$studentID] = $result->total ?? 0;
-                $formattedData['savedMarks']['status'][$studentID] = $result->status ?? 'failed';
+                $formattedData['study'][$studentID] = $result->test ?? 0;
+                $formattedData['exam'][$studentID] = $result->exam ?? 0;
+                $formattedData['attendance'][$studentID] = $result->presenceMark ?? 0;
+                $formattedData['total'][$studentID] = $result->total ?? 0;
+                $formattedData['status'][$studentID] = $result->status ?? 'failed';
             }
 
             return response()->json([

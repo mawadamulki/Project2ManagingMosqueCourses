@@ -63,6 +63,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // All Actors Route
 
+    Route::delete('/logout', [AuthController::class, 'logout']);
+
     Route::get('/getAllAnnouncements', [AnnouncementController::class, 'getAllAnnouncements']);
 
     Route::get('getSubjects/{couresID}/{levelName}', [PresenceController::class, 'getSubjects']);
