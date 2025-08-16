@@ -15,6 +15,7 @@ use App\Http\Controllers\JoiningRequestController;
 use App\Http\Controllers\WorksheetController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\GetFuncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +71,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('getSubjects/{couresID}/{levelName}', [PresenceController::class, 'getSubjects']);
     Route::get('getStudentInLevel/{subjectID}', [PresenceController::class, 'getStudentInLevel']);
 
+    Route::get('getStudentInfoInLevel/{studentID}/{courseID}/{levelName}', [GetFuncController::class, 'getStudentInfoInLevel']);
+
 
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
@@ -100,6 +103,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/getSubjectDetails/{courseID}/{levelName}', [SubjectController::class, 'getSubjectDetails']);
 
         Route::get('getMarksAdmin/{subjectID}', [ResultController::class, 'getMarks']);
+
+        Route::delete('deleteStudentAccount/{studentID}', [GetFuncController::class, 'deleteStudentAccount']);
+        Route::get('getAllStudents', [GetFuncController::class, 'getAllStudents']);
+        Route::get('getCoursesForStudent/{studentID}', [GetFuncController::class, 'getCoursesForStudent']);
+        Route::get('getCourseDetailForStudent/{studentID}/{courseID}/{levelName}', [GetFuncController::class, 'getCourseDetailForStudent']);
+        Route::delete('deleteTeacherAccount/{tacherID}', [GetFuncController::class, 'deleteTeacherAccount']);
+        Route::get('getAllTeachers', [GetFuncController::class, 'getAllTeachers']);
+        Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
+
 
     });
 
@@ -168,6 +180,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('addTestMarks/{subjectID}', [ResultController::class, 'addTestMarks']);
         Route::post('addExamMarks/{subjectID}', [ResultController::class, 'addExamMarks']);
         Route::get('getMarksSubadmin/{subjectID}', [ResultController::class, 'getMarks']);
+
+        Route::get('getAllStudents', [GetFuncController::class, 'getAllStudents']);
+        Route::get('getCoursesForStudent/{studentID}', [GetFuncController::class, 'getCoursesForStudent']);
+        Route::get('getCourseDetailForStudent/{studentID}/{courseID}/{levelName}', [GetFuncController::class, 'getCourseDetailForStudent']);
+        Route::get('getAllTeachers', [GetFuncController::class, 'getAllTeachers']);
+        Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
 
     });
 });
