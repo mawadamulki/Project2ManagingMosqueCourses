@@ -99,7 +99,11 @@ class GetFuncController extends Controller
             ->join('users', 'students.userID', '=', 'users.id')
             ->select([
                 'students.id as studentID',
-                'users.firstAndLastName as firstAndLastName'
+                'users.role',
+                'users.firstAndLastName as firstAndLastName',
+                'users.fatherName',
+                'users.email',
+                'users.phoneNumber'
             ])
             ->get();
 
@@ -243,7 +247,11 @@ class GetFuncController extends Controller
             ->join('users', 'teachers.userID', '=', 'users.id')
             ->select([
                 'teachers.id as teacherID',
-                'users.firstAndLastName as firstAndLastName'
+                'users.role',
+                'users.firstAndLastName as firstAndLastName',
+                'users.fatherName',
+                'users.email',
+                'users.phoneNumber'
             ])
             ->get();
 
