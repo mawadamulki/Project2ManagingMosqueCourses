@@ -16,6 +16,8 @@ use App\Http\Controllers\WorksheetController;
 use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\GetFuncController;
+use App\Http\Controllers\SearchController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -70,9 +72,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('getSubjects/{couresID}/{levelName}', [PresenceController::class, 'getSubjects']);
     Route::get('getStudentInLevel/{subjectID}', [PresenceController::class, 'getStudentInLevel']);
+    Route::get('getStudentInLevel2/{courseID}/{levelName}', [PresenceController::class, 'getStudentInLevel2']);
 
     Route::get('getStudentInfoInLevel/{studentID}/{courseID}/{levelName}', [GetFuncController::class, 'getStudentInfoInLevel']);
 
+    Route::get('searchInLevel/{courseID}/{levelName}/{search}', [SearchController::class, 'searchInLevel']);
+    Route::get('searchStudentTeacherInSystem/{search}', [SearchController::class, 'searchStudentTeacherInSystem']);
+    Route::get('searchSubject/{search}', [SearchController::class, 'searchSubject']);
 
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
@@ -81,6 +87,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/deleteMessage/{id}', [MessagesController::class, 'deleteMessage']);
     Route::get('/GetAllMessages', [MessagesController::class, 'GetAllMessages']);
     Route::post('/updateMessage/{id}', [MessagesController::class, 'updateMessage']);
+
+
 
 
 

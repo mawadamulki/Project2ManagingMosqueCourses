@@ -43,6 +43,33 @@ class PresenceController extends Controller
         ]);
     }
 
+    public function getStudentInLevel2($courseID, $levelName) {
+        $level = Level::where('courseID',$courseID)
+                    ->where('levelName', $levelName)
+                    ->first();
+
+        if (!$level) {
+            return response()->json([
+                'message' => 'Level not found.'
+            ], 404);
+        }
+
+
+        $students = DB::table('level_student_pivot')
+            ->join('students', 'level_student_pivot.studentID', '=', 'students.id')
+            ->join('users', 'students.userID', '=', 'users.id')
+            ->where('level_student_pivot.levelID', $level->id)
+            ->select([
+                'students.id as studentID',
+                'users.firstAndLastName as firstAndLastName'
+            ])
+            ->get();
+
+        return response()->json([
+            'students' => $students
+        ]);
+    }
+
 
     public function addPresence(Request $request) {
         $validator = Validator::make($request->all(), [
