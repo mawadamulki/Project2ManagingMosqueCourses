@@ -8,6 +8,7 @@ use App\Models\UserProfile;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\Teacher;
+use App\Models\Subadmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -248,13 +249,11 @@ class ProfileController extends Controller
                     ->distinct()
                     ->get();
 
-
         return response()->json([
             'data' => $mergedData,
             'courses' => $courses
         ]);
     }
-
 
     public function teacherProfile(){
         $user = Auth::user();
@@ -274,7 +273,6 @@ class ProfileController extends Controller
             return response()->json(['error' => 'teacher not found'], 404);
         }
 
-
         $user = User::where('id', $teacher->userID)
             ->select(
                 'email',
@@ -292,7 +290,6 @@ class ProfileController extends Controller
             $user->toArray()
         );
 
-
         $courses = DB::table('courses')
                     ->join('levels', 'courses.id', '=', 'levels.CourseID')
                     ->join('subjects', 'subjects.levelID', '=', 'levels.id')
@@ -309,11 +306,49 @@ class ProfileController extends Controller
                     ->distinct()
                     ->get();
 
-
-
         return response()->json([
             'data' => $mergedData,
             'courses' => $courses
+        ]);
+    }
+
+    public function subadminProfile(){
+        $user = Auth::user();
+        $subadminID = Subadmin::where('userID', $user->id)->get()->first();
+
+        $subadmin = Subadmin::where('id', $subadminID->id)
+            ->select(
+                'id as subadminID',
+                'studyOrCareer',
+                'magazeh',
+                'PreviousExperience',
+                'userID'
+            )
+            ->first();
+
+        if (!$subadmin) {
+            return response()->json(['error' => 'subadmin not found'], 404);
+        }
+
+        $user = User::where('id', $subadmin->userID)
+            ->select(
+                'email',
+                'firstAndLastName',
+                'fatherName',
+                'phoneNumber',
+                'birthDate',
+                'address',
+                'profileImage'
+            )
+            ->first();
+
+            $mergedData = array_merge(
+            $subadmin->toArray(),
+            $user->toArray()
+        );
+
+        return response()->json([
+            'data' => $mergedData
         ]);
     }
 

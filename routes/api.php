@@ -202,5 +202,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getAllTeachers', [GetFuncController::class, 'getAllTeachers']);
         Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
 
+        Route::get('subadminProfile', [ProfileController::class, 'subadminProfile']);
+
     });
 });
