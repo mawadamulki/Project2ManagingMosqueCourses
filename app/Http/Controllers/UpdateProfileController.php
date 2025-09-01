@@ -8,23 +8,101 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Validator;
 
 class UpdateProfileController extends Controller
 {
+    public function addProfileImage(Request $request) {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+                'profileImage' => ['required', 'image', 'mimes:jpeg,png,jpg,gif'],
+        ]);
+
+        $imagePath = $request->file('profileImage')->store('profiles', 'public');
+
+        $fullImageUrl = asset('storage/' . $imagePath);
+
+        $user->profileImage = $fullImageUrl;
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'image Added successfully'
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = auth()->user();
+
+            $validator = Validator::make($request->all(), [
+                'firstAndLastName' => 'sometimes|string|max:255',
+                'fatherName' => 'sometimes|string|max:255',
+                'phoneNumber' => 'sometimes|string|max:20',
+                'birthDate' => 'sometimes|date',
+                'address' => 'sometimes|string|max:500',
+                'profileImage' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:10240',
+            ], [
+                'profileImage.image' => 'The profile image must be a valid image.',
+                'profileImage.mimes' => 'The profile image must be a file of type: jpeg, png, jpg, gif.',
+                'profileImage.max' => 'The profile image may not be greater than 10MB.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $data = $request->only([
+                'firstAndLastName',
+                'fatherName',
+                'phoneNumber',
+                'birthDate',
+                'address'
+            ]);
+
+
+            if ($request->hasFile('profileImage')) {
+                if ($user->profileImage && Storage::exists('public/' . $user->profileImage)) {
+                    Storage::delete('public/' . $user->profileImage);
+                }
+
+                $imagePath = $request->file('profileImage')->store('profiles', 'public');
+                $fullImageUrl = asset('storage/' . $imagePath);
+                $data['profileImage'] = $fullImageUrl;
+            }
+
+            $data = array_filter($data, function ($value) {
+                return $value !== null;
+            });
+
+            $user->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function updateProfileImage(Request $request)
     {
         $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        $profile = UserProfile::where('userID', $user->id)->first();
-
-        if (!$profile) {
-            $profile = $user->userProfile()->create();
-        }
 
         if ($request->hasFile('profile_image')) {
             if ($profile->profile_image && Storage::disk('public')->exists($profile->profile_image)) {
@@ -70,24 +148,6 @@ class UpdateProfileController extends Controller
         ], 400);
     }
 
-    public function updateEmail(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-        if ($user->email !== $request->currentEmail) {
-            return response()->json([
-                'Current Email not correct'
-            ], 400);
-        }
-        $user->email = $request->newEmail;
-        $user->save();
-        return response()->json([
-            'Email updated successfully',
-            'role' => $user->role
-        ], 200);
-    }
     public function updatePhoneNumber(Request $request)
     {
         $user = Auth::user();

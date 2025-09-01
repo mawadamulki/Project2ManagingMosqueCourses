@@ -49,44 +49,6 @@ class CourseController extends Controller
 
     }
 
-    // public function updateCourseByAdmin(Request $request, $id)
-    // {
-    //     $user = Auth::user();
-
-    //     if ($user && $user->role === 'admin') {
-    //         $course = Course::find($id);
-    //         if (!$course) {
-    //             return response()->json(['message' => 'Course not found'], 404);
-    //         }
-
-    //         $validated = $request->validate([
-    //             'courseName' => ['nullable', 'string'],
-    //             'status' => ['nullable', 'in:previous,current,new'],
-    //             'courseImage' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-    //         ]);
-
-    //         if (isset($validated['courseName'])) $course->courseName = $validated['courseName'];
-    //         if (isset($validated['status'])) $course->status = $validated['status'];
-
-    //         if ($request->hasFile('courseImage')) {
-    //             $imagePath = $request->file('courseImage')->store('courses/img', 'public');
-    //             $course->courseImage = $imagePath;
-    //         }
-
-    //         $course->save();
-
-    //         return response()->json([
-    //             'message' => 'Course updated successfully.',
-    //             'course' => [
-    //                 'courseName' => $course->courseName,
-    //                 'status' => $course->status,
-    //                 'image_url' => asset('storage/' . $imagePath),
-    //             ],
-    //         ], 201);
-    //     }
-
-    //     return response()->json(['message' => 'User not authorized'], 403);
-    // }
 
     public function getAdminCourses(){
         $courses = Course::get();

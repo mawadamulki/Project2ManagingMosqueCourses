@@ -38,12 +38,14 @@ Route::get('/getAllAnnouncementsWithoutToken', action: [AnnouncementController::
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+
     //_______________________ProfileController_________________________________________
     Route::get('/showDetailesForStudent', [ProfileController::class, 'showDetailesForStudent']);
     Route::get('/showUserProfileByAdmin/{id}', [ProfileController::class, 'showUserProfileByAdmin']);
     Route::get('/showDetailesForTeacher', [ProfileController::class, 'showDetailesForTeacher']);
     Route::get('/showDetailesForSupervisor', [ProfileController::class, 'showDetailesForSupervisor']);
     Route::get('/showDetailesForAdmin', [ProfileController::class, 'showDetailesForAdmin']);
+
 
     //_______________________UpdateProfileController___________________________________
     Route::post('/updateProfileImage', [UpdateProfileController::class, 'updateProfileImage']);
@@ -56,8 +58,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/updatePreviousCoursesInOtherPlace', [UpdateProfileController::class, 'updatePreviousCoursesInOtherPlace']);
     Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
 
-    //_______________________CurriculumPlanController___________________________________
 
+    //_______________________CurriculumPlanController___________________________________
     Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
     Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
     Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
@@ -80,6 +82,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('searchStudentTeacherInSystem/{search}', [SearchController::class, 'searchStudentTeacherInSystem']);
     Route::get('searchSubject/{search}', [SearchController::class, 'searchSubject']);
 
+    Route::post('addProfileImage', [UpdateProfileController::class, 'addProfileImage']);
+    Route::post('updateProfile', [UpdateProfileController::class, 'updateProfile']);
+
     Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
     Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
     Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);
@@ -87,8 +92,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/deleteMessage/{id}', [MessagesController::class, 'deleteMessage']);
     Route::get('/GetAllMessages', [MessagesController::class, 'GetAllMessages']);
     Route::post('/updateMessage/{id}', [MessagesController::class, 'updateMessage']);
-
-
 
 
 
@@ -146,6 +149,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getTeacherSubjects/{courseID}/{levelName}', [ResultController::class, 'getTeacherSubjects']);
         Route::get('getMarksTeacher/{subjectID}', [ResultController::class, 'getMarks']);
 
+        Route::get('teacherProfile', [ProfileController::class, 'teacherProfile']);
+
     });
 
 
@@ -166,6 +171,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getTeacherAnswers/{worksheetID}', [WorksheetController::class, 'getTeacherAnswers']);
 
         Route::get('getMarksStudent/{subjectID}', [ResultController::class, 'getMarksStudent']);
+
+        Route::get('studentProfile', [ProfileController::class, 'studentProfile']);
 
     });
 

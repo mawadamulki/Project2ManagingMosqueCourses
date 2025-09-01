@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phoneNumber',
         'address',
         'birthDate',
+        'profileImage'
     ];
 
     public function teacher()

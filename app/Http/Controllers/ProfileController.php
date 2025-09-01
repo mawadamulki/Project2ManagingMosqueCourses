@@ -5,76 +5,44 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\Student;
+use App\Models\Course;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProfileController extends Controller
 {
-    public function showDetailesForStudent()
-    {
+    public function showDetailesForStudent() {
         $user = Auth::user();
+        $studentInfo = $user->student;
 
-        $user->load(['userProfile', 'student']);
-        if ($user->role === 'student') {
+        $data = [
+            'id' => $user->id,
+            'name' => $user->firstAndLastName,
+            'fatherName' => $user->fatherName,
+            'email' => $user->email,
+            'profileImage' => $user->profileImage,
+            'phoneNumber' => $user->phoneNumber,
+            'address' => $user->address,
+            'birthDate' => $user->birthDate,
+            'studyOrCareer' => $studentInfo->studyOrCareer,
+            'magazeh' => $studentInfo->magazeh,
+            'PreviousCoursesInOtherPlace' => $studentInfo->PreviousCoursesInOtherPlace,
+            'isPreviousStudent' => $studentInfo->isPreviousStudent,
+            'previousCourses' => $studentInfo->previousCourses,
+        ];
 
-            $data = [
-                'id' => $user->id,
-                'name' => $user->firstAndLastName,
-                'fatherName' => $user->fatherName,
-                'email' => $user->email,
-                // 'role' => $user->role,
-                'profile_image' => $user->userProfile?->profile_image,
-                'phoneNumber' => $user->phoneNumber,
-                'address' => $user->address,
-                'birthDate' => $user->birthDate
-            ];
+        return response()->json([
+            'data' => $data
+        ], 200);
 
-            $user->load([
-                'courses.levels.subjects',
-                'marks'
-            ]);
-
-            $studentInfo = $user->student;
-
-            $data['student_info'] = [
-
-                'studyOrCareer' => $studentInfo->studyOrCareer,
-                'magazeh' => $studentInfo->magazeh,
-                'PreviousCoursesInOtherPlace' => $studentInfo->PreviousCoursesInOtherPlace,
-                'isPreviousStudent' => $studentInfo->isPreviousStudent,
-                'previousCourses' => $studentInfo->previousCourses,
-            ];
-
-            $data['course'] = $user->courses->map(function ($course) use ($user) {
-                return [
-                    'id' => $course->id,
-                    'courseName' => $course->title ?? $course->courseName,
-                    'levels' => $course->levels->map(function ($level) use ($user) {
-                        return [
-                            'id' => $level->id,
-                            'levelName' => $level->name,
-                            'subjects' => $level->subjects->map(function ($subject) use ($user) {
-                                $mark = $user->marks->where('subject_id', $subject->id)->first();
-                                return [
-                                    'id' => $subject->id,
-                                    'subjectName' => $subject->subjectName,
-                                    'mark' => $mark?->mark,
-                                ];
-                            }),
-                        ];
-                    }),
-                ];
-            });
-            return response()->json([
-                // 'status' => true,
-                'data' => $data
-            ], 200);
-        } else {
-            return response()->json(['message' => 'User not found'],  404);
-        }
     }
+
+
     public function showDetailesForTeacher()
     {
         $user = Auth::user();
@@ -166,8 +134,7 @@ class ProfileController extends Controller
             return response()->json(['message' => 'User not found'],  404);
         }
     }
-    public function showDetailesForAdmin()
-    {
+    public function showDetailesForAdmin() {
 
         $user = Auth::user();
         $user->load(['userProfile', 'admin']);
@@ -184,19 +151,12 @@ class ProfileController extends Controller
                 'birthDate' => $user->birthDate
             ];
 
-
-
-            // $data['courses'] = $user->courses->map(function ($course) use ($user) {
-            //     return [
-            //         'id' => $course->id,
-            //         'courseName' => $course->title ?? $course->courseName,
-            //     ];
-            // });
             return response()->json($data, 200);
         } else {
             return response()->json(['message' => 'User not found'],  404);
         }
     }
+
     public function showUserProfileByAdmin($id)
     {
         try {
@@ -247,4 +207,114 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Unexpected error', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function studentProfile(){
+        $user = Auth::user();
+        $studentID = Student::where('userID', $user->id)->get()->first();
+
+        $student = Student::where('id', $studentID->id)
+            ->select(
+                'id as StudentID',
+                'studyOrCareer',
+                'magazeh',
+                'PreviousCoursesInOtherPlace',
+                'isPreviousStudent',
+                'previousCourses',
+                'userID'
+            )
+            ->first();
+
+        $user = User::where('id', $student->userID)
+            ->select(
+                'email',
+                'firstAndLastName',
+                'fatherName',
+                'phoneNumber',
+                'birthDate',
+                'address',
+                'profileImage'
+            )
+            ->first();
+
+            $mergedData = array_merge(
+            $student->toArray(),
+            $user->toArray()
+        );
+
+        $courses = Course::select('courses.*','levels.levelName')
+                    ->join('levels', 'levels.courseID', '=', 'courses.id')
+                    ->join('level_student_pivot', 'level_student_pivot.levelID', '=', 'levels.id')
+                    ->where('level_student_pivot.studentID', $studentID->id)
+                    ->distinct()
+                    ->get();
+
+
+        return response()->json([
+            'data' => $mergedData,
+            'courses' => $courses
+        ]);
+    }
+
+
+    public function teacherProfile(){
+        $user = Auth::user();
+        $teacherID = Teacher::where('userID', $user->id)->get()->first();
+
+        $teacher = Teacher::where('id', $teacherID->id)
+            ->select(
+                'id as teacherID',
+                'studyOrCareer',
+                'magazeh',
+                'PreviousExperience',
+                'userID'
+            )
+            ->first();
+
+        if (!$teacher) {
+            return response()->json(['error' => 'teacher not found'], 404);
+        }
+
+
+        $user = User::where('id', $teacher->userID)
+            ->select(
+                'email',
+                'firstAndLastName',
+                'fatherName',
+                'phoneNumber',
+                'birthDate',
+                'address',
+                'profileImage'
+            )
+            ->first();
+
+            $mergedData = array_merge(
+            $teacher->toArray(),
+            $user->toArray()
+        );
+
+
+        $courses = DB::table('courses')
+                    ->join('levels', 'courses.id', '=', 'levels.CourseID')
+                    ->join('subjects', 'subjects.levelID', '=', 'levels.id')
+                    ->join('teachers', 'teachers.id', '=', 'subjects.teacherID')
+                    ->select([
+                        'courses.id',
+                        'courses.courseName',
+                        'courses.status',
+                        'courses.courseImage',
+                        'courses.created_at',
+                        'courses.updated_at'
+                    ])
+                    ->where('subjects.TeacherID', $teacherID->id)
+                    ->distinct()
+                    ->get();
+
+
+
+        return response()->json([
+            'data' => $mergedData,
+            'courses' => $courses
+        ]);
+    }
+
 }

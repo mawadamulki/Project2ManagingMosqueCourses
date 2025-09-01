@@ -63,7 +63,6 @@ class SearchController extends Controller
                     $q->where('firstAndLastName', 'LIKE', "%$search%");
                 });
             })
-            ->with(['user:id,firstAndLastName'])
             ->get(['id', 'userID']);
 
         $teachers = Teacher::when($search, function($query, $search) {
@@ -71,7 +70,6 @@ class SearchController extends Controller
                     $q->where('firstAndLastName', 'LIKE', "%$search%");
                 });
             })
-            ->with(['user:id,firstAndLastName'])
             ->get(['id', 'userID']);
 
         return response()->json([
@@ -79,13 +77,21 @@ class SearchController extends Controller
             'students' => $students->map(function($student) {
                 return [
                     'id' => $student->id,
-                    'firstAndLastName' => $student->user->firstAndLastName
+                    'firstAndLastName' => $student->user->firstAndLastName,
+                    'fatherName' => $student->user->fatherName,
+                    'role' => $student->user->role,
+                    'phoneNumber' => $student->user->phoneNumber,
+                    'email' => $student->user->email
                 ];
             }),
             'teachers' => $teachers->map(function($teacher) {
                 return [
                     'id' => $teacher->id,
-                    'firstAndLastName' => $teacher->user->firstAndLastName
+                    'firstAndLastName' => $teacher->user->firstAndLastName,
+                    'fatherName' => $teacher->user->fatherName,
+                    'role' => $teacher->user->role,
+                    'phoneNumber' => $teacher->user->phoneNumber,
+                    'email' => $teacher->user->email
                 ];
             }),
             'count' => $teachers->count()+$students->count()

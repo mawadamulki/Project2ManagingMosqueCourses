@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('phoneNumber');
             $table->string('birthDate');
             $table->string('address');
+            $table->string('profileImage')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
