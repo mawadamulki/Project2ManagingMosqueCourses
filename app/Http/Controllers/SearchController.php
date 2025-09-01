@@ -76,7 +76,7 @@ class SearchController extends Controller
             'search_term' => $search ?? 'all',
             'students' => $students->map(function($student) {
                 return [
-                    'id' => $student->id,
+                    'studentID' => $student->id,
                     'firstAndLastName' => $student->user->firstAndLastName,
                     'fatherName' => $student->user->fatherName,
                     'role' => $student->user->role,
@@ -86,7 +86,7 @@ class SearchController extends Controller
             }),
             'teachers' => $teachers->map(function($teacher) {
                 return [
-                    'id' => $teacher->id,
+                    'teacherID' => $teacher->id,
                     'firstAndLastName' => $teacher->user->firstAndLastName,
                     'fatherName' => $teacher->user->fatherName,
                     'role' => $teacher->user->role,
