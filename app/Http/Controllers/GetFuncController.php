@@ -384,8 +384,7 @@ class GetFuncController extends Controller
                         'courses.courseName',
                         'courses.status',
                         'courses.courseImage',
-                        'courses.created_at',
-                        'courses.updated_at'
+                        'levels.levelName'
                     ])
                     ->where('subjects.TeacherID', $teacherID)
                     ->distinct()
