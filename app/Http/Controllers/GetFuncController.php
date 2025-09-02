@@ -239,6 +239,74 @@ class GetFuncController extends Controller
     }
 
 
+    public function getCourseDetailForStudent1($courseID, $levelName){
+        try {
+
+            $level = Level::where('courseID',$courseID)
+                ->where('levelName', $levelName)
+                ->first();
+
+            if (!$level) {
+                return response()->json([
+                    'message' => 'Level not found.'
+                ], 404);
+            }
+
+            $user = Auth::user();
+
+            $student = Student::where('userID', $user->id)->get()->first();
+            $studentID = $student->id;
+
+            $results = DB::table('subjects')
+                ->leftJoin('results', function($join) use ($studentID) {
+                    $join->on('subjects.id', '=', 'results.subjectID')
+                        ->where('results.studentID', '=', $studentID);
+                })
+                ->where('subjects.levelID', $level->id)
+                ->select([
+                    'subjects.id as subject_id',
+                    'subjects.subjectName',
+                    'results.test',
+                    'results.exam',
+                    'results.presenceMark as presence',
+                    'results.total',
+                    'results.status'
+                ])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'subject_id' => $item->subject_id,
+                        'subject_name' => $item->subjectName,
+                        'marks' => $item->test !== null ? [
+                            'test' => $item->test,
+                            'exam' => $item->exam,
+                            'presence' => $item->presence,
+                            'total' => $item->total,
+                            'status' => $item->status
+                        ] : null
+                    ];
+                });
+
+            return response()->json([
+                'data' => $results
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve marks',
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+    }
+
 
     // __________________________________________
 

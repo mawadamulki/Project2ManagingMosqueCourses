@@ -39,26 +39,6 @@ Route::get('/getAllAnnouncementsWithoutToken', action: [AnnouncementController::
 Route::middleware(['auth:sanctum'])->group(function () {
 
 
-    //_______________________ProfileController_________________________________________
-    Route::get('/showDetailesForStudent', [ProfileController::class, 'showDetailesForStudent']);
-    Route::get('/showUserProfileByAdmin/{id}', [ProfileController::class, 'showUserProfileByAdmin']);
-    Route::get('/showDetailesForTeacher', [ProfileController::class, 'showDetailesForTeacher']);
-    Route::get('/showDetailesForSupervisor', [ProfileController::class, 'showDetailesForSupervisor']);
-    Route::get('/showDetailesForAdmin', [ProfileController::class, 'showDetailesForAdmin']);
-
-
-    //_______________________UpdateProfileController___________________________________
-    Route::post('/updateProfileImage', [UpdateProfileController::class, 'updateProfileImage']);
-    Route::post('/updatePassword', [UpdateProfileController::class, 'updatePassword']);
-    Route::post('/updateEmail', [UpdateProfileController::class, 'updateEmail']);
-    Route::post('/updatePhoneNumber', [UpdateProfileController::class, 'updatePhoneNumber']);
-    Route::post('/updateStudyOrCareer', [UpdateProfileController::class, 'updateStudyOrCareer']);
-    Route::post('/updateMagazeh', [UpdateProfileController::class, 'updateMagazeh']);
-    Route::post('/updatePreviousExperience', [UpdateProfileController::class, 'updatePreviousExperience']);
-    Route::post('/updatePreviousCoursesInOtherPlace', [UpdateProfileController::class, 'updatePreviousCoursesInOtherPlace']);
-    Route::post('/updatePreviousCourses', [UpdateProfileController::class, 'updatePreviousCourses']);
-
-
     //_______________________CurriculumPlanController___________________________________
     Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
     Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
@@ -85,14 +65,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('addProfileImage', [UpdateProfileController::class, 'addProfileImage']);
     Route::post('updateProfile', [UpdateProfileController::class, 'updateProfile']);
 
-    Route::post('/sendMessage', [MessagesController::class, 'sendMessage']);
-    Route::get('/inboxReceivdeMessages', [MessagesController::class, 'inboxReceivdeMessages']);
-    Route::get('/outboxSendMessages', [MessagesController::class, 'outboxSendMessages']);
-    Route::post('/replyToMessage/{messageId}', [MessagesController::class, 'replyToMessage']);
-    Route::delete('/deleteMessage/{id}', [MessagesController::class, 'deleteMessage']);
-    Route::get('/GetAllMessages', [MessagesController::class, 'GetAllMessages']);
-    Route::post('/updateMessage/{id}', [MessagesController::class, 'updateMessage']);
-
+    Route::get('getSubadmin', [MessagesController::class, 'getSubadmin']);
+    Route::post('sendMessage', [MessagesController::class, 'sendMessage']);
+    Route::get('receivedMessages', [MessagesController::class, 'receivedMessages']);
+    Route::get('sentMessages', [MessagesController::class, 'sentMessages']);
+    Route::get('openMessage/{messageID}', [MessagesController::class, 'openMessage']);
 
 
     // Admin-only routes
@@ -151,6 +128,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('teacherProfile', [ProfileController::class, 'teacherProfile']);
 
+        Route::get('getLevelsForTeacher', [MessagesController::class, 'getLevelsForTeacher']);
+        Route::get('getStudentInLevel/{levelID}', [MessagesController::class, 'getStudentInLevel']);
+
     });
 
 
@@ -173,6 +153,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getMarksStudent/{subjectID}', [ResultController::class, 'getMarksStudent']);
 
         Route::get('studentProfile', [ProfileController::class, 'studentProfile']);
+        Route::get('getCourseDetailForStudent1/{courseID}/{levelName}', [GetFuncController::class, 'getCourseDetailForStudent1']);
 
     });
 

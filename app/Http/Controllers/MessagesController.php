@@ -6,217 +6,160 @@ use App\Models\User;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MessagesController extends Controller
 {
+    // تابع بجيب كل البريد الوارد
+    // تابع يجيب كل البريد الصادر
+    // تابع بجيب المشرفين
+    // تابع بجيب لفلات الاستاذ
+    // تابع بجيب الطلاب للأستاذ
+    // تابع ارسال رسالة
 
-    public function sendMessage(Request $request)
-    {
+
+    public function getSubadmin() {
+        $subadmins = DB::table('subadmins')
+            ->join('users', 'subadmins.userID', '=', 'users.id')
+            ->select([
+                'users.id as id',
+                'users.role',
+                'users.firstAndLastName as firstAndLastName'
+            ])
+            ->get();
+
+        return response()->json([
+            'subadmin' => $subadmins
+        ]);
+    }
+
+    public function getLevelsForTeacher(){
+        $user = Auth::user();
+        $levels = DB::table('levels')
+                    ->join('subjects', 'subjects.levelID', '=', 'levels.id')
+                    ->join('courses', 'courses.id', '=', 'levels.courseID')
+                    ->where('courses.status', 'current')
+                    ->where('subjects.teacherID', $user->teacher->id)
+                    ->select(['levels.id', 'levels.levelName'])
+                    ->get();
+
+        return response()->json([
+            'levels' => $levels
+        ]);
+    }
+
+    public function getStudentInLevel($levelID){
+
+        $students = DB::table('level_student_pivot')
+            ->join('students', 'level_student_pivot.studentID', '=', 'students.id')
+            ->join('users', 'students.userID', '=', 'users.id')
+            ->where('level_student_pivot.levelID', $levelID)
+            ->select([
+                'students.id as studentID',
+                'users.firstAndLastName as firstAndLastName'
+            ])
+            ->get();
+
+        return response()->json([
+            'students' => $students
+        ]);
+
+    }
+
+
+    public function sendMessage(Request $request) {
+
         $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $validated = $request->validate([
-            'receiverName' => ['required', 'string', 'exists:users,firstAndLastName'],
+            'receiverID' => ['required', 'string', 'exists:users,id'],
+            'subject' => ['required', 'string'],
             'content' => ['required', 'string'],
         ]);
 
-        $receiver = User::where('firstAndLastName', $validated['receiverName'])->first();
-
-        if (!$receiver) {
-            return response()->json(['message' => 'Receiver not found'], 404);
-        }
-
         $message = Message::create([
             'senderID' => $user->id,
-            'receiverID' => $receiver->id,
+            'receiverID' => $validated['receiverID'],
             'content' => $validated['content'],
-            'parent_id' => null,
+            'subject' => $validated['subject'],
         ]);
 
         return response()->json([
-            'message' => 'Message sent successfully',
-            'data' => [
-                'from' => $message->sender->firstAndLastName ?? 'Unknown',
-                'to' => $receiver->firstAndLastName,
-                'content' => $message->content,
-                'sentAt' => $message->created_at->format('Y-m-d H:i:s'),
-            ]
+            'message' => 'Message sent successfully'
         ], 201);
+
     }
 
-    public function inboxReceivdeMessages()
-    {
+
+    public function receivedMessages() {
+
         $user = Auth::user();
 
-        $messages = Message::where('receiverID', $user->id)
-            ->with(['sender', 'parent'])
+        $message = Message::where('receiverID', $user->id)
+            ->with(['sender'])
             ->latest()
             ->get()
             ->map(function ($message) {
                 return [
                     'id' => $message->id,
-                    'type' => $message->parentID ? 'reply' : 'original',
-                    'from' => $message->sender->firstAndLastName ?? 'Unknown',
-                    'senderRole' => $message->sender->role ?? 'Unknown',
+                    'from' => $message->sender->firstAndLastName ,
+                    'senderRole' => $message->sender->role ,
                     'receivedAt' => $message->created_at->format('Y-m-d H:i'),
+                    'subject' => $message->subject,
                     'content' => $message->content,
-                    'inReplyTo' => $message->parent ? [
-                        'id' => $message->parent->id,
-                        'content' => $message->parent->content,
-                        'sentAt' => $message->parent->created_at->format('Y-m-d H:i'),
-                    ] : null,
+                    'open' => $message->open,
                 ];
             });
 
-        return response()->json(['inbox' => $messages], 200);
+        return response()->json(['received' => $message], 200);
     }
-    public function outboxSendMessages()
-    {
+
+
+    public function sentMessages() {
+
         $user = Auth::user();
 
         $messages = Message::where('senderID', $user->id)
-            ->with(['receiver', 'parent'])
             ->latest()
             ->get()
             ->map(function ($message) {
                 return [
                     'id' => $message->id,
-                    'type' => $message->parentID ? 'reply' : 'original',
-                    'to' => $message->receiver->firstAndLastName ?? 'Unknown',
-                    'receiverRole' => $message->receiver->role ?? 'Unknown',
+                    'to' => $message->receiver->firstAndLastName ,
+                    'receiverRole' => $message->receiver->role ,
                     'sentAt' => $message->created_at->format('Y-m-d H:i'),
+                    'subject' => $message->subject,
                     'content' => $message->content,
-                    'inReplyTo' => $message->parent ? [
-                        'id' => $message->parent->id,
-                        'content' => $message->parent->content,
-                        'sentAt' => $message->parent->created_at->format('Y-m-d H:i'),
-                    ] : null,
                 ];
             });
 
-        return response()->json(['outbox' => $messages], 200);
+        return response()->json(['sent' => $messages], 200);
     }
 
-    public function replyToMessage(Request $request, $messageId)
-    {
-        $user = Auth::user();
 
-        $validated = $request->validate([
-            'replyContent' => ['required', 'string'],
-        ]);
-
-        $originalMessage = Message::find($messageId);
-
-        if (!$originalMessage) {
-            return response()->json(['message' => 'Original message not found'], 404);
+    public function openMessage($messageID) {
+        $message = Message::find($messageID);
+        if($message == null){
+            return response()->json([
+                'message' => 'Message not found!'
+            ], 404);
         }
 
-        if ($originalMessage->receiverID !== $user->id) {
-            return response()->json(['message' => 'Unauthorized to reply'], 403);
-        }
+        if($message->open == false){
+            $message->update([
+                'open' => true
+            ]);
 
-        $replyMessage = Message::create([
-            'senderID' => $user->id,
-            'receiverID' => $originalMessage->senderID,
-            'content' => $validated['replyContent'],
-            'parentID' => $originalMessage->id,
-        ]);
-
+            return response()->json([
+                'message' => 'message change its open successfully',
+                'data' => $message->fresh()
+            ], 200);
+        }else
         return response()->json([
-            'message' => 'Reply sent successfully',
-            'data' => [
-                'to' => $replyMessage->receiver->firstAndLastName ?? 'Unknown',
-                'content' => $replyMessage->content,
-                'sentAt' => $replyMessage->created_at->format('Y-m-d H:i'),
-                'inReplyTo' => [
-                    'id' => $originalMessage->id,
-                    'content' => $originalMessage->content,
-                    'sentAt' => $originalMessage->created_at->format('Y-m-d H:i'),
-                ]
-            ]
-        ], 201);
+                'message' => 'message is already opened',
+                'data' => $message->open
+        ], 422);
     }
 
-    public function deleteMessage($id)
-    {
-        $user = Auth::user();
 
-        $message = Message::find($id);
-
-        if (!$message) {
-            return response()->json(['message' => 'Message not found'], 404);
-        }
-
-        if ($message->senderID !== $user->id && $message->receiverID !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $message->delete();
-
-        return response()->json(['message' => 'Message deleted successfully'], 200);
-    }
-    public function GetAllMessages()
-    {
-        $user = Auth::user();
-
-        $messages = Message::where('senderID', $user->id)
-            ->orWhere('receiverID', $user->id)
-            ->with(['sender', 'receiver', 'parent'])
-            ->latest()
-            ->get()
-            ->map(function ($message) use ($user) {
-                return [
-                    'id' => $message->id,
-                    'direction' => $message->senderID === $user->id ? 'sent' : 'received',
-                    'type' => $message->parentID ? 'reply' : 'original',
-                    'from' => $message->sender->firstAndLastName ?? 'Unknown',
-                    'to' => $message->receiver->firstAndLastName ?? 'Unknown',
-                    'senderRole' => $message->sender->role ?? 'Unknown',
-                    'receiverRole' => $message->receiver->role ?? 'Unknown',
-                    'sentAt' => $message->created_at->format('Y-m-d H:i'),
-                    'content' => $message->content,
-                    'inReplyTo' => $message->parent ? [
-                        'id' => $message->parent->id,
-                        'content' => $message->parent->content,
-                        'sentAt' => $message->parent->created_at->format('Y-m-d H:i'),
-                    ] : null,
-                ];
-            });
-
-        return response()->json(['allMessages' => $messages], 200);
-    }
-
-    public function updateMessage(Request $request, $id)
-    {
-        $user = Auth::user();
-
-        $validated = $request->validate([
-            'newContent' => ['required', 'string'],
-        ]);
-
-        $message = Message::find($id);
-
-        if (!$message) {
-            return response()->json(['message' => 'Message not found'], 404);
-        }
-
-        if ($message->senderID !== $user->id) {
-            return response()->json(['message' => 'Unauthorized to edit this message'], 403);
-        }
-
-        $message->content = $validated['newContent'];
-        $message->save();
-
-        return response()->json([
-            'message' => 'Message updated successfully',
-            'data' => [
-                'id' => $message->id,
-                'content' => $message->content,
-                'updatedAt' => $message->updated_at->format('Y-m-d H:i'),
-            ]
-        ], 200);
-    }
 }
