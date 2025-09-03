@@ -5,132 +5,85 @@ namespace App\Http\Controllers;
 use App\Models\Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use App\Models\CurriculumPlan;
 
 class CurriculumPlanController extends Controller
 {
-    public function addCurriculumPlanToLevel(Request $request, $levelId)
+    public function addCurriculumPlan(Request $request)
     {
-        $user = Auth::user();
-
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $validated = $request->validate([
+            'courseID' => ['required','accepted', 'exists:users,id'],
+            'levelName' => ['required', 'string', 'in:introductory,level1,level2,level3,level4,level5,level6'],
+            'subjectName' => ['required', 'string'],
             'sessionDate' => ['required', 'string'],
             'sessionContent' => ['required', 'string'],
         ]);
 
-        try {
-            $carbonDate = Carbon::parse($validated['sessionDate']);
-            $dayName = $carbonDate->locale('ar')->translatedFormat('l');
-            $formattedDate = $dayName . ' ' . $carbonDate->format('Y-m-d');
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid date format'], 400);
-        }
+        $level = Level::where('courseID',$validated['courseID'])
+                ->where('levelName', $validated['levelName'])
+                ->first();
 
-        $level = Level::findOrFail($levelId);
-
-        if ($level->curriculumPlans()->count() >= 35) {
-            return response()->json(['message' => 'Maximum of 35 sessions allowed per level'], 400);
+        if (!$level) {
+            return response()->json([
+                'message' => 'Level not found.'
+            ], 404);
         }
 
         $session = $level->curriculumPlans()->create([
-            'sessionDate' => $formattedDate,
+            'levelID' => $level->id,
+            'subjectName' => $validated['subjectName'],
+            'sessionDate' => $validated['sessionDate'],
             'sessionContent' => $validated['sessionContent'],
         ]);
 
         return response()->json([
             'message' => 'Session added successfully',
-            'session date' => $session->sessionDate,
-            'session content' => $session->sessionContent,
         ]);
     }
 
 
-    public function getCurriculumPlanByLevel($levelId)
+    public function getCurriculumPlan($courseID, $levelName)
     {
         $user = Auth::user();
 
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $level = Level::with('curriculumPlans')->find($levelId);
+        $level = Level::with('curriculumPlans')
+                    ->where('courseID',$courseID)
+                    ->where('levelName', $levelName)
+                    ->first();
 
         if (!$level) {
-            return response()->json(['message' => 'Level not found'], 404);
+            return response()->json([
+                'message' => 'Level not found.'
+            ], 404);
         }
+
         $curriculum = $level->curriculumPlans->map(function ($plan) {
             return [
+                'id' => $plan->id,
+                'subjectName' => $plan->subjectName,
                 'sessionDate' => $plan->sessionDate,
                 'sessionContent' => $plan->sessionContent,
             ];
         });
 
         return response()->json([
-            'courseID' => $level->courseID,
-            'levelName' => $level->levelName,
             'levelId' => $level->id,
             'curriculumPlan' => $curriculum
         ]);
     }
 
-    public function updateCurriculumPlanForLevel(Request $request, $levelId, $sessionId)
+    public function deleteCurriculumPlan($sessionID)
     {
-        $user = Auth::user();
-
-        if (!$user || $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'sessionDate' => ['sometimes', 'string'],
-            'sessionContent' => ['sometimes', 'string'],
-        ]);
-
-        if (empty($validated)) {
-            return response()->json(['message' => 'No data provided to update'], 400);
-        }
-        $level = Level::find($levelId);
-
-        if (!$level) {
-            return response()->json(['message' => 'Level not found'], 404);
-        }
-
-        $session = $level->curriculumPlans()->where('id', $sessionId)->first();
+        $session = CurriculumPlan::where('id', $sessionID)->get()->first();
 
         if (!$session) {
-            return response()->json(['message' => 'Session not found in this level'], 404);
-        }
-        $updateData = [];
-
-        if (isset($validated['sessionDate'])) {
-
-            try {
-                $carbonDate = Carbon::parse($validated['sessionDate']);
-                $dayName = $carbonDate->locale('ar')->translatedFormat('l');
-                $formattedDate = $dayName . ' ' . $carbonDate->format('Y-m-d');
-                $updateData['sessionDate'] = $formattedDate;
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'Invalid date format'], 400);
-            }
+            return response()->json(['message' => 'Session not found'], 404);
         }
 
-        if (isset($validated['sessionContent'])) {
-            $updateData['sessionContent'] = $validated['sessionContent'];
-        }
-
-        $session->update($updateData);
+        $session->delete();
 
         return response()->json([
-            'message' => 'Curriculum session updated successfully',
-            'updated_session' => [
-                'id' => $session->id,
-                'sessionDate' => $session->sessionDate,
-                'sessionContent' => $session->sessionContent,
-            ]
+            'message' => 'Curriculum session deleted successfully',
         ]);
     }
 }

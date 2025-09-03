@@ -26,7 +26,7 @@ class Level extends Model
         return $this->belongsToMany(Student::class ,'level_student_pivot', 'levelID', 'studentID');
     }
 
-    public function curriculumPlan()
+    public function curriculumPlans()
     {
         return $this->hasMany(CurriculumPlan::class, 'levelID');
     }

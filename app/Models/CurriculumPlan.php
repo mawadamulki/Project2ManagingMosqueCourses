@@ -8,6 +8,7 @@ class CurriculumPlan extends Model
 {
     protected $table="curriculumPlans";
     protected $fillable=[
+        'subjectName',
         'levelID',
         'sessionDate',
         'sessionContent'

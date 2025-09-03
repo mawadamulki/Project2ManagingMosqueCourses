@@ -40,8 +40,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     //_______________________CurriculumPlanController___________________________________
-    Route::post('/addCurriculumPlanToLevel/{levelId}', [CurriculumPlanController::class, 'addCurriculumPlanToLevel']);
-    Route::get('/getCurriculumPlanByLevel/{levelId}', [CurriculumPlanController::class, 'getCurriculumPlanByLevel']);
     Route::post('/updateCurriculumPlanForLevel/{levelId}/{sessionId}', [CurriculumPlanController::class, 'updateCurriculumPlanForLevel']);
 
 
@@ -100,6 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getAllTeachers', [GetFuncController::class, 'getAllTeachers']);
         Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
 
+        Route::post('addCurriculumPlan', [CurriculumPlanController::class, 'addCurriculumPlan']);
+        Route::get('getCurriculumPlan/{courseID}/{levelName}', [CurriculumPlanController::class, 'getCurriculumPlan']);
+        Route::delete('deleteCurriculumPlan/{sessionID}', [CurriculumPlanController::class, 'deleteCurriculumPlan']);
 
     });
 
