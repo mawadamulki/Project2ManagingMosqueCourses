@@ -55,7 +55,7 @@ class MessagesController extends Controller
             ->join('users', 'students.userID', '=', 'users.id')
             ->where('level_student_pivot.levelID', $levelID)
             ->select([
-                'students.id as studentID',
+                'users.id as id',
                 'users.firstAndLastName as firstAndLastName'
             ])
             ->get();

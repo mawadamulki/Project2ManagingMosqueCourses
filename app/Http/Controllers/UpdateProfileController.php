@@ -45,6 +45,12 @@ class UpdateProfileController extends Controller
                 'phoneNumber' => 'sometimes|string|max:20',
                 'birthDate' => 'sometimes|date',
                 'address' => 'sometimes|string|max:500',
+                'studyOrCareer' => 'sometimes|string|max:500',
+                'magazeh' => 'sometimes|boolean',
+                'PreviousExperience' => 'sometimes|string|max:500',
+                'PreviousCoursesInOtherPlace' => 'sometimes|string|max:500',
+                'isPreviousStudent' => 'sometimes|string|max:500',
+                'previousCourses' => 'sometimes|string|max:500',
                 'profileImage' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:10240',
             ], [
                 'profileImage.image' => 'The profile image must be a valid image.',
@@ -68,6 +74,38 @@ class UpdateProfileController extends Controller
                 'address'
             ]);
 
+            $studentData = $request->only([
+                'studyOrCareer',
+                'magazeh',
+                'PreviousCoursesInOtherPlace',
+                'isPreviousStudent',
+                'previousCourses'
+            ]);
+
+            $teacherData = $request->only([
+                'studyOrCareer',
+                'magazeh',
+                'PreviousExperience',
+            ]);
+
+            if ($user->role === 'teacher'|| $user->role === 'subadmin'){
+                $teacherData = array_filter($teacherData, function ($value) {
+                    return $value !== null;
+                });
+
+                if ($user->role === 'teacher')
+                    $user->teacher->update($teacherData);
+                if ($user->role === 'subadmin')
+                    $user->subadmin->update($teacherData);
+            }
+
+            if ($user->role === 'student'){
+                $studentData = array_filter($studentData, function ($value) {
+                    return $value !== null;
+                });
+
+                $user->student->update($studentData);
+            }
 
             if ($request->hasFile('profileImage')) {
                 if ($user->profileImage && Storage::exists('public/' . $user->profileImage)) {
@@ -335,6 +373,7 @@ class UpdateProfileController extends Controller
             'message' => 'PreviousCoursesInOtherPlace updated successfully',
         ], 200);
     }
+
     public function updatePreviousCourses(Request $request)
     {
         $user = Auth::user();
