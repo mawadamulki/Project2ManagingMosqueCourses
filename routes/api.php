@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('receivedMessages', [MessagesController::class, 'receivedMessages']);
     Route::get('sentMessages', [MessagesController::class, 'sentMessages']);
     Route::get('openMessage/{messageID}', [MessagesController::class, 'openMessage']);
+    Route::get('getTeachers', [MessagesController::class, 'getTeachers']);
 
 
     // Admin-only routes

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Message;
+use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -161,5 +163,39 @@ class MessagesController extends Controller
         ], 422);
     }
 
+
+    public function getTeachers(){
+        $user = Auth::user();
+        $level = DB::table('level_student_pivot')
+                    ->join('levels','levels.id', '=', 'level_student_pivot.levelID')
+                    ->join('courses','courses.id', '=', 'levels.courseID')
+                    ->where('courses.status','current')
+                    ->where('level_student_pivot.studentID', $user->student->id)
+                    //->select()
+                    ->get('levels.id')->first();
+
+        if($level == null)
+            return response()->json([
+                'message' => 'the student is not in current course.'
+            ]);
+
+        $teachers = Subject::where('levelID', $level->id)->get('teacherID');
+
+        $response = [];
+        foreach($teachers as $teacher){
+            $teach = Teacher::where('id', $teacher->teacherID)->get()->first();
+
+            $response = [
+                'id' => $teach->user->id,
+                'firstAndLastName' => $teach->user->firstAndLastName
+            ];
+        }
+
+        return response()->json([
+            'teachers' => $response
+        ]);
+
+
+    }
 
 }
