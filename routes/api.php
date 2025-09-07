@@ -70,6 +70,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('openMessage/{messageID}', [MessagesController::class, 'openMessage']);
     Route::get('getTeachers', [MessagesController::class, 'getTeachers']);
 
+    Route::get('getCurriculumPlan/{courseID}/{levelName}', [CurriculumPlanController::class, 'getCurriculumPlan']);
+
 
     // Admin-only routes
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
@@ -100,7 +102,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
 
         Route::post('addCurriculumPlan', [CurriculumPlanController::class, 'addCurriculumPlan']);
-        Route::get('getCurriculumPlan/{courseID}/{levelName}', [CurriculumPlanController::class, 'getCurriculumPlan']);
         Route::delete('deleteCurriculumPlan/{sessionID}', [CurriculumPlanController::class, 'deleteCurriculumPlan']);
 
     });
