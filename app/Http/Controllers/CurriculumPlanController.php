@@ -12,7 +12,7 @@ class CurriculumPlanController extends Controller
     public function addCurriculumPlan(Request $request)
     {
         $validated = $request->validate([
-            'courseID' => ['required', 'integer', 'exists:users,id'],
+            'courseID' => ['required', 'integer', 'exists:courses,id'],
             'levelName' => ['required', 'string', 'in:introductory,level1,level2,level3,level4,level5,level6'],
             'subjectName' => ['required', 'string'],
             'sessionDate' => ['required', 'string'],
