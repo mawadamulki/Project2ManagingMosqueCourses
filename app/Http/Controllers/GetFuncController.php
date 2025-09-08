@@ -404,7 +404,7 @@ class GetFuncController extends Controller
             ->join('users', 'subadmins.userID', '=', 'users.id')
             ->select(
                 'subadmins.id',
-                'role',
+                'role',~
                 'email',
                 'firstAndLastName',
                 'fatherName',
