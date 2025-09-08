@@ -12,4 +12,10 @@ class Subadmin extends Model
         'magazeh',
         'PreviousExperience',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userID');
+    }
+
 }

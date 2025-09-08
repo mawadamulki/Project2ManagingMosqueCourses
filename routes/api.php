@@ -100,6 +100,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('deleteTeacherAccount/{tacherID}', [GetFuncController::class, 'deleteTeacherAccount']);
         Route::get('getAllTeachers', [GetFuncController::class, 'getAllTeachers']);
         Route::get('getCoursesForTeacher/{teacherID}', [GetFuncController::class, 'getCoursesForTeacher']);
+        Route::get('getAllSubadmins', [GetFuncController::class, 'getAllSubadmins']);
+        Route::delete('deleteSubadminAccount/{subadminID}', [GetFuncController::class, 'deleteSubadminAccount']);
+
 
         Route::post('addCurriculumPlan', [CurriculumPlanController::class, 'addCurriculumPlan']);
         Route::delete('deleteCurriculumPlan/{sessionID}', [CurriculumPlanController::class, 'deleteCurriculumPlan']);

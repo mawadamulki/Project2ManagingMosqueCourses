@@ -12,7 +12,7 @@ use App\Models\Subject;
 use App\Models\Presence;
 use App\Models\Course;
 use App\Models\Teacher;
-
+use App\Models\Subadmin;
 
 class GetFuncController extends Controller
 {
@@ -399,6 +399,35 @@ class GetFuncController extends Controller
     }
 
 
+    public function getAllSubadmins() {
+        $subadmins = DB::table('subadmins')
+            ->join('users', 'subadmins.userID', '=', 'users.id')
+            ->select(
+                'subadmins.id',
+                'email',
+                'firstAndLastName',
+                'fatherName',
+                'phoneNumber',
+                'birthDate',
+                'address'
+                )
+            ->get();
+
+        return response()->json([
+            'subadmin' => $subadmins
+        ]);
+    }
+
+
+    public function deleteSubadminAccount($subadminID){
+        $subadmin = Subadmin::findOrFail($subadminID);
+        $subadmin->user()->delete();
+        $subadmin->delete();
+
+        return response()->json([
+            'message' => 'subadmin deleted succesfully'
+        ], 200);
+    }
 
 
 
